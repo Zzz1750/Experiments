@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>give up</title>
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+</head>
+<body>
+  <a-scene>
+    <!-- 360 Image Background -->
+    <a-sky src="1.JPG"></a-sky>
+
+    <!-- Camera Rig -->
+    <a-entity id="cameraRig" position="0 1.6 0">
+      <a-camera wasd-controls="enabled: false" look-controls="enabled: false" user-height="0"></a-camera>
+    </a-entity>
+
+    <!-- Right Hand Controller -->
+    <a-entity id="rightHand" 
+              oculus-touch-controls="hand: right"
+              tracked-controls>
+    </a-entity>
+
+    <!-- Movement Script -->
+    <script>
+      // Register the component for custom movement
+      AFRAME.registerComponent('controller-move', {
+        init: function () {
+          const rig = document.querySelector('#cameraRig');
+          const controller = document.querySelector('#rightHand');
+
+          // Ensure controller is connected
+          controller.addEventListener('connected', () => {
+            console.log('Controller connected:', controller);
+          });
+
+          // Handle thumbstick movement
+          controller.addEventListener('thumbstickmoved', (evt) => {
+            console.log('Thumbstick moved:', evt.detail);
+            const deltaX = evt.detail.x * 0.1; // Adjust sensitivity
+            const deltaZ = evt.detail.y * 0.1;
+
+            // Get current position of the rig
+            const position = rig.getAttribute('position');
+
+            // Update rig position
+            rig.setAttribute('position', {
+              x: position.x + deltaX,
+              y: position.y,
+              z: position.z + deltaZ,
+            });
+          });
+        },
+      });
+
+      // Attach the component to the controller
+      document.querySelector('#rightHand').setAttribute('controller-move', '');
+    </script>
+  </a-scene>
+</body>
+</html>
