@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>360° Image Viewer with Joystick Control</title>
+    <title>360° Image Viewer - Disable Headset Movement</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   </head>
@@ -19,35 +19,6 @@
         look-controls="enabled: false" 
         wasd-controls="enabled: false">
       </a-entity>
-
-      <!-- Custom Script for Joystick Navigation -->
-      <script>
-        AFRAME.registerComponent('joystick-navigation', {
-          init: function () {
-            this.camera = document.querySelector('#camera');
-            this.rotationSpeed = 2; // Speed of rotation
-          },
-          tick: function () {
-            // Get gamepad input
-            const gamepads = navigator.getGamepads();
-            if (gamepads[0]) {
-              const rightStickX = gamepads[0].axes[2]; // Right joystick horizontal
-              const rightStickY = gamepads[0].axes[3]; // Right joystick vertical
-
-              // Rotate camera based on joystick input
-              const rotation = this.camera.getAttribute('rotation');
-              this.camera.setAttribute('rotation', {
-                x: rotation.x - rightStickY * this.rotationSpeed,
-                y: rotation.y - rightStickX * this.rotationSpeed,
-                z: rotation.z,
-              });
-            }
-          },
-        });
-
-        // Attach the component to the camera
-        document.querySelector('#camera').setAttribute('joystick-navigation', '');
-      </script>
     </a-scene>
   </body>
 </html>
