@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>plz</title>
+    <title> Movement</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   </head>
@@ -21,16 +21,20 @@
       </a-entity>
 
       <script>
-        AFRAME.registerComponent('disable-headset-tracking', {
+        // Lock camera movement and rotation
+        AFRAME.registerComponent('disable-headset-movement', {
           init: function () {
-            const camera = this.el.object3D; // Access camera's 3D object
+            const camera = this.el.object3D;
             const initialPosition = camera.position.clone();
             const initialQuaternion = camera.quaternion.clone();
 
-            // Lock the camera in place on every frame
+            // Listen for entering VR
             this.el.sceneEl.addEventListener('enter-vr', () => {
               console.log('Disabling headset tracking...');
-              this.el.sceneEl.addEventListener('tick', () => {
+              const sceneEl = this.el.sceneEl;
+
+              // On each frame, reset the camera's position and rotation
+              sceneEl.addEventListener('tick', () => {
                 camera.position.copy(initialPosition);
                 camera.quaternion.copy(initialQuaternion);
               });
@@ -39,7 +43,7 @@
         });
 
         // Attach the component to the camera
-        document.querySelector('#camera').setAttribute('disable-headset-tracking', '');
+        document.querySelector('#camera').setAttribute('disable-headset-movement', '');
       </script>
     </a-scene>
   </body>
