@@ -3,55 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Viewer </title>
-  <!-- Include the correct Three.js and VRButton.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/vr/VRButton.js"></script>
+  <title>360 VR Viewer</title>
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 </head>
 <body style="margin: 0; overflow: hidden;">
+  <canvas id="renderCanvas"></canvas>
   <script>
-    // Basic Setup for Three.js
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+    const canvas = document.getElementById("renderCanvas");
+    const engine = new BABYLON.Engine(canvas, true);
 
-    // Enable WebXR (for VR)
-    renderer.xr.enabled = true;
-    document.body.appendChild(VRButton.createButton(renderer));  // Ensure VRButton is loaded properly
+    // Create a Babylon.js scene
+    const createScene = async function () {
+      const scene = new BABYLON.Scene(engine);
 
-    // Create a 360° Sphere with the texture image
-    const textureLoader = new THREE.TextureLoader();
-    const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
-    sphereGeometry.scale(-1, 1, 1); // Invert sphere to look inside
-    const sphereMaterial = new THREE.MeshBasicMaterial({
-      map: textureLoader.load('1.JPG', () => {
-        console.log("Texture loaded successfully!");
-      }, undefined, (error) => {
-        console.error("Error loading texture: ", error);
-      }),
+      // Create a 360° sphere with an inverted texture
+      const sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { segments: 32, diameter: 1000 }, scene);
+      sphere.invertU = true; // Invert the UV to make the texture visible inside the sphere
+
+      const sphereMaterial = new BABYLON.StandardMaterial("sphereMaterial", scene);
+      sphereMaterial.diffuseTexture = new BABYLON.Texture("1.JPG", scene); // Replace with your image path
+      sphereMaterial.diffuseTexture.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
+      sphereMaterial.diffuseTexture.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
+      sphere.material = sphereMaterial;
+
+      // Set up WebXR
+      const xrHelper = await scene.createDefaultXRExperienceAsync();
+
+      // Disable physical headset movement
+      xrHelper.baseExperience.camera.onViewMatrixChangedObservable.add(() => {
+        xrHelper.baseExperience.camera.rotationQuaternion = new BABYLON.Quaternion(0, 0, 0, 1);
+      });
+
+      // Add input for the right-hand controller
+      xrHelper.input.onControllerAddedObservable.add((controller) => {
+        if (controller.inputSource.handedness === "right") {
+          controller.onMotionControllerInitObservable.add((motionController) => {
+            const thumbstick = motionController.getComponent("xr-standard-thumbstick");
+            if (thumbstick) {
+              thumbstick.onAxisValueChangedObservable.add((axes) => {
+                // Adjust camera rotation based on joystick input
+                const rotationSpeed = 0.02;
+                const camera = xrHelper.baseExperience.camera;
+
+                // Rotate horizontally (axes.x)
+                camera.rotation.y -= axes.x * rotationSpeed;
+
+                // Rotate vertically (axes.y)
+                camera.rotation.x -= axes.y * rotationSpeed;
+                camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x)); // Limit vertical rotation
+              });
+            }
+          });
+        }
+      });
+
+      return scene;
+    };
+
+    const scene = await createScene();
+
+    // Run the render loop
+    engine.runRenderLoop(() => {
+      scene.render();
     });
 
-    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    scene.add(sphere);
-
-    // Lock Headset Movement (Freeze Camera Rotation)
-    const initialRotation = new THREE.Quaternion();
-    camera.quaternion.copy(initialRotation);
-
-    // Main render loop
-    renderer.setAnimationLoop(() => {
-      // Force camera to stay locked in initial rotation
-      camera.quaternion.copy(initialRotation);
-      renderer.render(scene, camera);
-    });
-
-    // Handle Window Resize
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+    // Handle resizing
+    window.addEventListener("resize", () => {
+      engine.resize();
     });
   </script>
 </body>
