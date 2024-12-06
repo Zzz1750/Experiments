@@ -1,50 +1,51 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title> Movement</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  </head>
-  <body>
-    <a-scene>
-      <!-- 360 Image Sphere -->
-      <a-sky src="1.JPG"></a-sky>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hh</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/vr/VRButton.js"></script>
+</head>
+<body style="margin: 0; overflow: hidden;">
+  <script>
+    // Basic Setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-      <!-- Camera Entity -->
-      <a-entity 
-        id="camera" 
-        camera 
-        position="0 1.6 0" 
-        look-controls="enabled: false" 
-        wasd-controls="enabled: false">
-      </a-entity>
+    // Enable WebXR
+    renderer.xr.enabled = true;
+    document.body.appendChild(VRButton.createButton(renderer));
 
-      <script>
-        // Lock camera movement and rotation
-        AFRAME.registerComponent('disable-headset-movement', {
-          init: function () {
-            const camera = this.el.object3D;
-            const initialPosition = camera.position.clone();
-            const initialQuaternion = camera.quaternion.clone();
+    // Create a 360° Sphere
+    const textureLoader = new THREE.TextureLoader();
+    const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
+    sphereGeometry.scale(-1, 1, 1); // Invert sphere to look inside
+    const sphereMaterial = new THREE.MeshBasicMaterial({
+      map: textureLoader.load('1.JPG'),
+    });
+    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    scene.add(sphere);
 
-            // Listen for entering VR
-            this.el.sceneEl.addEventListener('enter-vr', () => {
-              console.log('Disabling headset tracking...');
-              const sceneEl = this.el.sceneEl;
+    // Lock Headset Movement
+    const initialRotation = new THREE.Quaternion();
+    camera.quaternion.copy(initialRotation);
 
-              // On each frame, reset the camera's position and rotation
-              sceneEl.addEventListener('tick', () => {
-                camera.position.copy(initialPosition);
-                camera.quaternion.copy(initialQuaternion);
-              });
-            });
-          },
-        });
+    renderer.setAnimationLoop(() => {
+      // Force camera to stay in place
+      camera.quaternion.copy(initialRotation);
+      renderer.render(scene, camera);
+    });
 
-        // Attach the component to the camera
-        document.querySelector('#camera').setAttribute('disable-headset-movement', '');
-      </script>
-    </a-scene>
-  </body>
+    // Handle Window Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
 </html>
