@@ -10,68 +10,70 @@
 <body style="margin: 0; overflow: hidden;">
   <canvas id="renderCanvas"></canvas>
   <script>
-    const canvas = document.getElementById("renderCanvas");
-    const engine = new BABYLON.Engine(canvas, true);
+    (async function() {
+      const canvas = document.getElementById("renderCanvas");
+      const engine = new BABYLON.Engine(canvas, true);
 
-    // Create a Babylon.js scene
-    const createScene = async function () {
-      const scene = new BABYLON.Scene(engine);
+      // Create a Babylon.js scene
+      const createScene = async function () {
+        const scene = new BABYLON.Scene(engine);
 
-      // Create a 360° sphere with an inverted texture
-      const sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { segments: 32, diameter: 1000 }, scene);
-      sphere.invertU = true; // Invert the UV to make the texture visible inside the sphere
+        // Create a 360° sphere with an inverted texture
+        const sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { segments: 32, diameter: 1000 }, scene);
+        sphere.invertU = true; // Invert the UV to make the texture visible inside the sphere
 
-      const sphereMaterial = new BABYLON.StandardMaterial("sphereMaterial", scene);
-      sphereMaterial.diffuseTexture = new BABYLON.Texture("1.JPG", scene); // Replace with your image path
-      sphereMaterial.diffuseTexture.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
-      sphereMaterial.diffuseTexture.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
-      sphere.material = sphereMaterial;
+        const sphereMaterial = new BABYLON.StandardMaterial("sphereMaterial", scene);
+        sphereMaterial.diffuseTexture = new BABYLON.Texture("1.JPG", scene); // Replace with your image path
+        sphereMaterial.diffuseTexture.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
+        sphereMaterial.diffuseTexture.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
+        sphere.material = sphereMaterial;
 
-      // Set up WebXR
-      const xrHelper = await scene.createDefaultXRExperienceAsync();
+        // Set up WebXR
+        const xrHelper = await scene.createDefaultXRExperienceAsync();
 
-      // Disable physical headset movement
-      xrHelper.baseExperience.camera.onViewMatrixChangedObservable.add(() => {
-        xrHelper.baseExperience.camera.rotationQuaternion = new BABYLON.Quaternion(0, 0, 0, 1);
+        // Disable physical headset movement
+        xrHelper.baseExperience.camera.onViewMatrixChangedObservable.add(() => {
+          xrHelper.baseExperience.camera.rotationQuaternion = new BABYLON.Quaternion(0, 0, 0, 1);
+        });
+
+        // Add input for the right-hand controller
+        xrHelper.input.onControllerAddedObservable.add((controller) => {
+          if (controller.inputSource.handedness === "right") {
+            controller.onMotionControllerInitObservable.add((motionController) => {
+              const thumbstick = motionController.getComponent("xr-standard-thumbstick");
+              if (thumbstick) {
+                thumbstick.onAxisValueChangedObservable.add((axes) => {
+                  // Adjust camera rotation based on joystick input
+                  const rotationSpeed = 0.02;
+                  const camera = xrHelper.baseExperience.camera;
+
+                  // Rotate horizontally (axes.x)
+                  camera.rotation.y -= axes.x * rotationSpeed;
+
+                  // Rotate vertically (axes.y)
+                  camera.rotation.x -= axes.y * rotationSpeed;
+                  camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x)); // Limit vertical rotation
+                });
+              }
+            });
+          }
+        });
+
+        return scene;
+      };
+
+      const scene = await createScene();
+
+      // Run the render loop
+      engine.runRenderLoop(() => {
+        scene.render();
       });
 
-      // Add input for the right-hand controller
-      xrHelper.input.onControllerAddedObservable.add((controller) => {
-        if (controller.inputSource.handedness === "right") {
-          controller.onMotionControllerInitObservable.add((motionController) => {
-            const thumbstick = motionController.getComponent("xr-standard-thumbstick");
-            if (thumbstick) {
-              thumbstick.onAxisValueChangedObservable.add((axes) => {
-                // Adjust camera rotation based on joystick input
-                const rotationSpeed = 0.02;
-                const camera = xrHelper.baseExperience.camera;
-
-                // Rotate horizontally (axes.x)
-                camera.rotation.y -= axes.x * rotationSpeed;
-
-                // Rotate vertically (axes.y)
-                camera.rotation.x -= axes.y * rotationSpeed;
-                camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x)); // Limit vertical rotation
-              });
-            }
-          });
-        }
+      // Handle resizing
+      window.addEventListener("resize", () => {
+        engine.resize();
       });
-
-      return scene;
-    };
-
-    const scene = await createScene();
-
-    // Run the render loop
-    engine.runRenderLoop(() => {
-      scene.render();
-    });
-
-    // Handle resizing
-    window.addEventListener("resize", () => {
-      engine.resize();
-    });
+    })();
   </script>
 </body>
 </html>
