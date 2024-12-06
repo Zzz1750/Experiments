@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>360° Image Viewer - Disable Headset Movement</title>
+    <title>yesss</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   </head>
@@ -11,7 +11,7 @@
       <!-- 360 Image Sphere -->
       <a-sky src="1.JPG"></a-sky>
 
-      <!-- Camera with Custom Look Controls Disabled -->
+      <!-- Camera Entity -->
       <a-entity 
         id="camera"
         camera 
@@ -21,24 +21,34 @@
       </a-entity>
 
       <script>
-        // Disable headset rotation during VR
-        AFRAME.registerComponent('disable-headset-sensors', {
+        // Component to freeze the camera's position and rotation
+        AFRAME.registerComponent('freeze-camera', {
           init: function () {
-            const sceneEl = this.el.sceneEl;
-            sceneEl.addEventListener('enter-vr', () => {
-              const xrSession = sceneEl.renderer.xr.getSession();
+            const cameraEl = this.el;
+            const originalMatrix = cameraEl.object3D.matrix.clone(); // Save initial matrix
+            
+            this.el.sceneEl.addEventListener('enter-vr', () => {
+              const xrSession = this.el.sceneEl.renderer.xr.getSession();
               if (xrSession) {
-                xrSession.updateRenderState({
-                  baseLayer: xrSession.renderState.baseLayer,
-                  outputContext: null, // Disable default WebXR output context
-                });
+                console.log('Disabling headset tracking');
+                this.el.sceneEl.renderer.xr.camera = null; // Disable XR camera tracking
               }
+            });
+
+            // Keep the camera in the same position and orientation
+            this.el.sceneEl.addEventListener('tick', () => {
+              cameraEl.object3D.matrix.copy(originalMatrix); // Restore original matrix
+              cameraEl.object3D.matrix.decompose(
+                cameraEl.object3D.position,
+                cameraEl.object3D.quaternion,
+                cameraEl.object3D.scale
+              );
             });
           },
         });
 
-        // Attach the component to the scene
-        document.querySelector('a-scene').setAttribute('disable-headset-sensors', '');
+        // Attach the component to the camera
+        document.querySelector('#camera').setAttribute('freeze-camera', '');
       </script>
     </a-scene>
   </body>
