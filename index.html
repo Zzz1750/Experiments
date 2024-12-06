@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>nop</title>
+    <title>plz</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   </head>
@@ -13,7 +13,7 @@
 
       <!-- Camera Entity -->
       <a-entity 
-        id="camera"
+        id="camera" 
         camera 
         position="0 1.6 0" 
         look-controls="enabled: false" 
@@ -21,41 +21,25 @@
       </a-entity>
 
       <script>
-        // Component to lock the camera's pose
-        AFRAME.registerComponent('lock-camera-pose', {
+        AFRAME.registerComponent('disable-headset-tracking', {
           init: function () {
-            const camera = this.el.object3D;
-
-            // Save the initial pose (position and rotation)
+            const camera = this.el.object3D; // Access camera's 3D object
             const initialPosition = camera.position.clone();
-            const initialRotation = camera.rotation.clone();
+            const initialQuaternion = camera.quaternion.clone();
 
-            // Listen for the VR session start
+            // Lock the camera in place on every frame
             this.el.sceneEl.addEventListener('enter-vr', () => {
-              const xrSession = this.el.sceneEl.renderer.xr.getSession();
-              if (xrSession) {
-                console.log('Disabling headset tracking...');
-
-                // Override the XR frame callback to freeze the pose
-                const originalRequestAnimationFrame = xrSession.requestAnimationFrame.bind(xrSession);
-                xrSession.requestAnimationFrame = (callback) => {
-                  originalRequestAnimationFrame((time, xrFrame) => {
-                    const pose = xrFrame.getViewerPose(xrSession.renderState.baseLayer.getViewport()); // Pose override
-                    if (pose) {
-                      // Lock the pose
-                      camera.position.copy(initialPosition);
-                      camera.rotation.copy(initialRotation);
-                    }
-                    callback(time, xrFrame);
-                  });
-                };
-              }
+              console.log('Disabling headset tracking...');
+              this.el.sceneEl.addEventListener('tick', () => {
+                camera.position.copy(initialPosition);
+                camera.quaternion.copy(initialQuaternion);
+              });
             });
           },
         });
 
         // Attach the component to the camera
-        document.querySelector('#camera').setAttribute('lock-camera-pose', '');
+        document.querySelector('#camera').setAttribute('disable-headset-tracking', '');
       </script>
     </a-scene>
   </body>
