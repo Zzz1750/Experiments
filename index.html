@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>yesss</title>
+    <title>360° Image Viewer - Disable Headset Movement</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   </head>
@@ -21,34 +21,41 @@
       </a-entity>
 
       <script>
-        // Component to freeze the camera's position and rotation
-        AFRAME.registerComponent('freeze-camera', {
+        // Component to lock the camera's pose
+        AFRAME.registerComponent('lock-camera-pose', {
           init: function () {
-            const cameraEl = this.el;
-            const originalMatrix = cameraEl.object3D.matrix.clone(); // Save initial matrix
-            
+            const camera = this.el.object3D;
+
+            // Save the initial pose (position and rotation)
+            const initialPosition = camera.position.clone();
+            const initialRotation = camera.rotation.clone();
+
+            // Listen for the VR session start
             this.el.sceneEl.addEventListener('enter-vr', () => {
               const xrSession = this.el.sceneEl.renderer.xr.getSession();
               if (xrSession) {
-                console.log('Disabling headset tracking');
-                this.el.sceneEl.renderer.xr.camera = null; // Disable XR camera tracking
-              }
-            });
+                console.log('Disabling headset tracking...');
 
-            // Keep the camera in the same position and orientation
-            this.el.sceneEl.addEventListener('tick', () => {
-              cameraEl.object3D.matrix.copy(originalMatrix); // Restore original matrix
-              cameraEl.object3D.matrix.decompose(
-                cameraEl.object3D.position,
-                cameraEl.object3D.quaternion,
-                cameraEl.object3D.scale
-              );
+                // Override the XR frame callback to freeze the pose
+                const originalRequestAnimationFrame = xrSession.requestAnimationFrame.bind(xrSession);
+                xrSession.requestAnimationFrame = (callback) => {
+                  originalRequestAnimationFrame((time, xrFrame) => {
+                    const pose = xrFrame.getViewerPose(xrSession.renderState.baseLayer.getViewport()); // Pose override
+                    if (pose) {
+                      // Lock the pose
+                      camera.position.copy(initialPosition);
+                      camera.rotation.copy(initialRotation);
+                    }
+                    callback(time, xrFrame);
+                  });
+                };
+              }
             });
           },
         });
 
         // Attach the component to the camera
-        document.querySelector('#camera').setAttribute('freeze-camera', '');
+        document.querySelector('#camera').setAttribute('lock-camera-pose', '');
       </script>
     </a-scene>
   </body>
