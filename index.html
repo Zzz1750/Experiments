@@ -11,7 +11,7 @@
       <!-- 360 Image Sphere -->
       <a-sky src="1.JPG"></a-sky>
 
-      <!-- Camera Entity with Disabled Look Controls -->
+      <!-- Camera with Custom Look Controls Disabled -->
       <a-entity 
         id="camera"
         camera 
@@ -19,6 +19,27 @@
         look-controls="enabled: false" 
         wasd-controls="enabled: false">
       </a-entity>
+
+      <script>
+        // Disable headset rotation during VR
+        AFRAME.registerComponent('disable-headset-sensors', {
+          init: function () {
+            const sceneEl = this.el.sceneEl;
+            sceneEl.addEventListener('enter-vr', () => {
+              const xrSession = sceneEl.renderer.xr.getSession();
+              if (xrSession) {
+                xrSession.updateRenderState({
+                  baseLayer: xrSession.renderState.baseLayer,
+                  outputContext: null, // Disable default WebXR output context
+                });
+              }
+            });
+          },
+        });
+
+        // Attach the component to the scene
+        document.querySelector('a-scene').setAttribute('disable-headset-sensors', '');
+      </script>
     </a-scene>
   </body>
 </html>
