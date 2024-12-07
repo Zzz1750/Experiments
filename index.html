@@ -2,23 +2,11 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Joystick-Controlled Sphere</title>
+    <title>Joystick Debug</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   </head>
   <body>
     <a-scene>
-      <!-- Camera -->
-      <a-camera position="0 1.6 0">
-        <!-- Sphere inside the camera -->
-        <a-sphere 
-          id="sphere" 
-          src="1.JPG" 
-          radius="5000" 
-          material="side: double; shader: flat" 
-          position="0 0 0">
-        </a-sphere>
-      </a-camera>
-
       <!-- Right-hand controller -->
       <a-entity 
         id="rightController" 
@@ -27,26 +15,28 @@
         windows-motion-controls="hand: right" 
         generic-tracked-controller="hand: right">
       </a-entity>
+
+      <!-- Text for displaying joystick input -->
+      <a-text 
+        id="joystickDisplay" 
+        position="-1 2 -3" 
+        color="black" 
+        value="Move the joystick to see output">
+      </a-text>
     </a-scene>
 
     <script>
-      // Get references to the sphere and controller
-      const sphere = document.querySelector('#sphere');
+      // Get references to the controller and text element
       const rightController = document.querySelector('#rightController');
-
-      // Track the current rotation of the sphere
-      let sphereRotation = { x: 0, y: 0 };
+      const joystickDisplay = document.querySelector('#joystickDisplay');
 
       // Listen for joystick movement
       rightController.addEventListener('axismove', (event) => {
         const [x, y] = event.detail.axis;
 
-        // Update the sphere's rotation based on joystick input
-        sphereRotation.y -= x * 2; // Horizontal rotation
-        sphereRotation.x -= y * 2; // Vertical rotation (optional, comment out if not needed)
-
-        // Apply the updated rotation to the sphere
-        sphere.setAttribute('rotation', `${sphereRotation.x} ${sphereRotation.y} 0`);
+        // Log to console and display on screen
+        console.log(`Joystick Axis: X=${x}, Y=${y}`);
+        joystickDisplay.setAttribute('value', `Joystick Axis:\nX=${x.toFixed(2)}\nY=${y.toFixed(2)}`);
       });
     </script>
   </body>
