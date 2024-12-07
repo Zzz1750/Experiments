@@ -2,29 +2,53 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Fixed Sphere with Camera</title>
+    <title>lol</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   </head>
   <body>
     <a-scene>
-      <!-- Camera with the sphere as a child -->
-      <a-camera position="0 1.6 0">
-        <!-- Sphere inside the camera -->
-        <a-sphere 
-          src="1.JPG" 
-          radius="5000" 
-          material="side: double; shader: flat" 
-          position="0 0 0">
-        </a-sphere>
+      <!-- Camera with look-controls -->
+      <a-entity 
+        id="cameraRig" 
+        position="0 1.6 0" 
+        rotation="0 0 0">
+        <a-camera look-controls>
+          <!-- Sphere inside the camera rig -->
+          <a-sphere 
+            src="1.JPG" 
+            radius="5000" 
+            material="side: double; shader: flat" 
+            position="0 0 0">
+          </a-sphere>
+        </a-camera>
+      </a-entity>
 
-        <!-- Optional cursor for interaction -->
-        <a-entity 
-          cursor="fuse: true; fuseTimeout: 500" 
-          position="0 0 -1" 
-          geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" 
-          material="color: black; shader: flat">
-        </a-entity>
-      </a-camera>
+      <!-- Hand controller for joystick input -->
+      <a-entity 
+        id="rightController" 
+        oculus-touch-controls="hand: right" 
+        vive-controls="hand: right" 
+        windows-motion-controls="hand: right" 
+        generic-tracked-controller="hand: right">
+      </a-entity>
     </a-scene>
+
+    <script>
+      // Add event listener for joystick input
+      const rightController = document.querySelector('#rightController');
+      const cameraRig = document.querySelector('#cameraRig');
+
+      rightController.addEventListener('axismove', (event) => {
+        const [x, y] = event.detail.axis;
+
+        // Adjust camera rig rotation based on joystick input
+        const rotation = cameraRig.getAttribute('rotation');
+        cameraRig.setAttribute('rotation', {
+          x: rotation.x,
+          y: rotation.y - x * 2, // Rotate horizontally with joystick
+          z: 0
+        });
+      });
+    </script>
   </body>
 </html>
