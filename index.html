@@ -2,20 +2,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Joystick Full Debug</title>
+    <title>Gamepad Debug</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   </head>
   <body>
     <a-scene>
-      <!-- Add the controller -->
-      <a-entity 
-        id="rightController" 
-        oculus-touch-controls="hand: right" 
-        tracked-controls 
-        raycaster="objects: .clickable">
-      </a-entity>
-
-      <!-- Text for joystick debug -->
+      <!-- Text to show joystick data -->
       <a-text 
         id="joystickDisplay" 
         position="-1 2 -3" 
@@ -25,32 +17,28 @@
     </a-scene>
 
     <script>
-      // Get references
-      const rightController = document.querySelector('#rightController');
       const joystickDisplay = document.querySelector('#joystickDisplay');
 
-      // Log all events for debugging
-      rightController.addEventListener('axismove', (event) => {
-        const [x, y] = event.detail.axis;
-        console.log(`Joystick Axis Move: X=${x}, Y=${y}`);
-        joystickDisplay.setAttribute('value', `Joystick Axis:\nX=${x.toFixed(2)}\nY=${y.toFixed(2)}`);
-      });
+      // Check gamepad data at regular intervals
+      setInterval(() => {
+        const gamepads = navigator.getGamepads();
 
-      rightController.addEventListener('buttondown', (event) => {
-        console.log('Button Pressed:', event.detail);
-      });
-
-      rightController.addEventListener('buttonup', (event) => {
-        console.log('Button Released:', event.detail);
-      });
-
-      rightController.addEventListener('connected', (event) => {
-        console.log('Controller Connected:', event.detail);
-      });
-
-      rightController.addEventListener('disconnected', (event) => {
-        console.log('Controller Disconnected:', event.detail);
-      });
+        if (gamepads) {
+          const controller = gamepads[0] || gamepads[1]; // Assuming right-hand controller
+          if (controller) {
+            const { axes, buttons } = controller;
+            console.log('Gamepad Axes:', axes);
+            joystickDisplay.setAttribute(
+              'value',
+              `Axes:\nX=${axes[2]?.toFixed(2)}\nY=${axes[3]?.toFixed(2)}`
+            );
+          } else {
+            joystickDisplay.setAttribute('value', 'No controller connected.');
+          }
+        } else {
+          joystickDisplay.setAttribute('value', 'No gamepad detected.');
+        }
+      }, 500);
     </script>
   </body>
 </html>
