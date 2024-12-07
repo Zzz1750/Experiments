@@ -2,43 +2,36 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Gamepad Debug</title>
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <title>Raw WebXR Test</title>
   </head>
   <body>
-    <a-scene>
-      <!-- Text to show joystick data -->
-      <a-text 
-        id="joystickDisplay" 
-        position="-1 2 -3" 
-        color="black" 
-        value="Awaiting joystick input...">
-      </a-text>
-    </a-scene>
-
+    <h1>Raw WebXR Test</h1>
+    <p>Ensure your controllers are connected and move the joystick or press buttons to see input.</p>
+    <pre id="output">Awaiting input...</pre>
     <script>
-      const joystickDisplay = document.querySelector('#joystickDisplay');
+      const output = document.getElementById('output');
 
-      // Check gamepad data at regular intervals
-      setInterval(() => {
+      function checkGamepads() {
         const gamepads = navigator.getGamepads();
-
-        if (gamepads) {
-          const controller = gamepads[0] || gamepads[1]; // Assuming right-hand controller
-          if (controller) {
-            const { axes, buttons } = controller;
-            console.log('Gamepad Axes:', axes);
-            joystickDisplay.setAttribute(
-              'value',
-              `Axes:\nX=${axes[2]?.toFixed(2)}\nY=${axes[3]?.toFixed(2)}`
-            );
-          } else {
-            joystickDisplay.setAttribute('value', 'No controller connected.');
-          }
-        } else {
-          joystickDisplay.setAttribute('value', 'No gamepad detected.');
+        if (!gamepads) {
+          output.innerText = 'No gamepads detected.';
+          return;
         }
-      }, 500);
+
+        const logs = [];
+        for (let i = 0; i < gamepads.length; i++) {
+          const gp = gamepads[i];
+          if (gp) {
+            logs.push(`Gamepad ${i}:`);
+            logs.push(`  Axes: ${gp.axes.map(a => a.toFixed(2)).join(', ')}`);
+            logs.push(`  Buttons: ${gp.buttons.map((b, idx) => `B${idx}: ${b.value.toFixed(2)}`).join(', ')}`);
+          }
+        }
+
+        output.innerText = logs.length ? logs.join('\n') : 'No gamepads connected.';
+      }
+
+      setInterval(checkGamepads, 500);
     </script>
   </body>
 </html>
