@@ -2,28 +2,24 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>lol</title>
+    <title>Joystick-Controlled Sphere</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   </head>
   <body>
     <a-scene>
-      <!-- Camera with look-controls -->
-      <a-entity 
-        id="cameraRig" 
-        position="0 1.6 0" 
-        rotation="0 0 0">
-        <a-camera look-controls>
-          <!-- Sphere inside the camera rig -->
-          <a-sphere 
-            src="1.JPG" 
-            radius="5000" 
-            material="side: double; shader: flat" 
-            position="0 0 0">
-          </a-sphere>
-        </a-camera>
-      </a-entity>
+      <!-- Camera -->
+      <a-camera position="0 1.6 0">
+        <!-- Sphere inside the camera -->
+        <a-sphere 
+          id="sphere" 
+          src="1.JPG" 
+          radius="5000" 
+          material="side: double; shader: flat" 
+          position="0 0 0">
+        </a-sphere>
+      </a-camera>
 
-      <!-- Hand controller for joystick input -->
+      <!-- Right-hand controller -->
       <a-entity 
         id="rightController" 
         oculus-touch-controls="hand: right" 
@@ -34,20 +30,23 @@
     </a-scene>
 
     <script>
-      // Add event listener for joystick input
+      // Get references to the sphere and controller
+      const sphere = document.querySelector('#sphere');
       const rightController = document.querySelector('#rightController');
-      const cameraRig = document.querySelector('#cameraRig');
 
+      // Track the current rotation of the sphere
+      let sphereRotation = { x: 0, y: 0 };
+
+      // Listen for joystick movement
       rightController.addEventListener('axismove', (event) => {
         const [x, y] = event.detail.axis;
 
-        // Adjust camera rig rotation based on joystick input
-        const rotation = cameraRig.getAttribute('rotation');
-        cameraRig.setAttribute('rotation', {
-          x: rotation.x,
-          y: rotation.y - x * 2, // Rotate horizontally with joystick
-          z: 0
-        });
+        // Update the sphere's rotation based on joystick input
+        sphereRotation.y -= x * 2; // Horizontal rotation
+        sphereRotation.x -= y * 2; // Vertical rotation (optional, comment out if not needed)
+
+        // Apply the updated rotation to the sphere
+        sphere.setAttribute('rotation', `${sphereRotation.x} ${sphereRotation.y} 0`);
       });
     </script>
   </body>
