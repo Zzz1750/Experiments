@@ -2,41 +2,54 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Joystick Debug</title>
+    <title>Joystick Full Debug</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   </head>
   <body>
     <a-scene>
-      <!-- Right-hand controller -->
+      <!-- Add the controller -->
       <a-entity 
         id="rightController" 
         oculus-touch-controls="hand: right" 
-        vive-controls="hand: right" 
-        windows-motion-controls="hand: right" 
-        generic-tracked-controller="hand: right">
+        tracked-controls 
+        raycaster="objects: .clickable">
       </a-entity>
 
-      <!-- Text for displaying joystick input -->
+      <!-- Text for joystick debug -->
       <a-text 
         id="joystickDisplay" 
         position="-1 2 -3" 
         color="black" 
-        value="Move the joystick to see output">
+        value="Awaiting joystick input...">
       </a-text>
     </a-scene>
 
     <script>
-      // Get references to the controller and text element
+      // Get references
       const rightController = document.querySelector('#rightController');
       const joystickDisplay = document.querySelector('#joystickDisplay');
 
-      // Listen for joystick movement
+      // Log all events for debugging
       rightController.addEventListener('axismove', (event) => {
         const [x, y] = event.detail.axis;
-
-        // Log to console and display on screen
-        console.log(`Joystick Axis: X=${x}, Y=${y}`);
+        console.log(`Joystick Axis Move: X=${x}, Y=${y}`);
         joystickDisplay.setAttribute('value', `Joystick Axis:\nX=${x.toFixed(2)}\nY=${y.toFixed(2)}`);
+      });
+
+      rightController.addEventListener('buttondown', (event) => {
+        console.log('Button Pressed:', event.detail);
+      });
+
+      rightController.addEventListener('buttonup', (event) => {
+        console.log('Button Released:', event.detail);
+      });
+
+      rightController.addEventListener('connected', (event) => {
+        console.log('Controller Connected:', event.detail);
+      });
+
+      rightController.addEventListener('disconnected', (event) => {
+        console.log('Controller Disconnected:', event.detail);
       });
     </script>
   </body>
