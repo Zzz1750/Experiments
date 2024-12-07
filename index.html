@@ -1,79 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>360 VR Viewer</title>
-  <script src="https://cdn.babylonjs.com/babylon.js"></script>
-  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
-</head>
-<body style="margin: 0; overflow: hidden;">
-  <canvas id="renderCanvas"></canvas>
-  <script>
-    (async function() {
-      const canvas = document.getElementById("renderCanvas");
-      const engine = new BABYLON.Engine(canvas, true);
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixed Sphere with Camera</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <!-- Camera with the sphere as a child -->
+      <a-camera position="0 1.6 0">
+        <!-- Sphere inside the camera -->
+        <a-sphere 
+          src="1.JPG" 
+          radius="5000" 
+          material="side: double; shader: flat" 
+          position="0 0 0">
+        </a-sphere>
 
-      // Create a Babylon.js scene
-      const createScene = async function () {
-        const scene = new BABYLON.Scene(engine);
-
-        // Create a 360° sphere with an inverted texture
-        const sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { segments: 32, diameter: 1000 }, scene);
-        sphere.invertU = true; // Invert the UV to make the texture visible inside the sphere
-
-        const sphereMaterial = new BABYLON.StandardMaterial("sphereMaterial", scene);
-        sphereMaterial.diffuseTexture = new BABYLON.Texture("1.JPG", scene); // Replace with your image path
-        sphereMaterial.diffuseTexture.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
-        sphereMaterial.diffuseTexture.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
-        sphere.material = sphereMaterial;
-
-        // Set up WebXR
-        const xrHelper = await scene.createDefaultXRExperienceAsync();
-
-        // Disable physical headset movement
-        xrHelper.baseExperience.camera.onViewMatrixChangedObservable.add(() => {
-          xrHelper.baseExperience.camera.rotationQuaternion = new BABYLON.Quaternion(0, 0, 0, 1);
-        });
-
-        // Add input for the right-hand controller
-        xrHelper.input.onControllerAddedObservable.add((controller) => {
-          if (controller.inputSource.handedness === "right") {
-            controller.onMotionControllerInitObservable.add((motionController) => {
-              const thumbstick = motionController.getComponent("xr-standard-thumbstick");
-              if (thumbstick) {
-                thumbstick.onAxisValueChangedObservable.add((axes) => {
-                  // Adjust camera rotation based on joystick input
-                  const rotationSpeed = 0.02;
-                  const camera = xrHelper.baseExperience.camera;
-
-                  // Rotate horizontally (axes.x)
-                  camera.rotation.y -= axes.x * rotationSpeed;
-
-                  // Rotate vertically (axes.y)
-                  camera.rotation.x -= axes.y * rotationSpeed;
-                  camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x)); // Limit vertical rotation
-                });
-              }
-            });
-          }
-        });
-
-        return scene;
-      };
-
-      const scene = await createScene();
-
-      // Run the render loop
-      engine.runRenderLoop(() => {
-        scene.render();
-      });
-
-      // Handle resizing
-      window.addEventListener("resize", () => {
-        engine.resize();
-      });
-    })();
-  </script>
-</body>
+        <!-- Optional cursor for interaction -->
+        <a-entity 
+          cursor="fuse: true; fuseTimeout: 500" 
+          position="0 0 -1" 
+          geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" 
+          material="color: black; shader: flat">
+        </a-entity>
+      </a-camera>
+    </a-scene>
+  </body>
 </html>
