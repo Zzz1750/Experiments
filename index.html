@@ -12,12 +12,21 @@
     <a-sky src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg" rotation="0 -90 0"></a-sky>
 
     <!-- Camera with touch controls and no gyroscope -->
-    <a-entity 
-    camera 
-    look-controls="touchEnabled: true; reverseTouchDrag: false; magicWindowTrackingEnabled: false; maxPitch: 90; minPitch: -90" 
-    position="0 1.6 0">
-</a-entity>
-
+    <script>
+      AFRAME.registerComponent('custom-look-controls', {
+        init: function () {
+          this.el.setAttribute('look-controls', {
+            enabled: true,
+            touchEnabled: true,
+            reverseTouchDrag: false,
+            magicWindowTrackingEnabled: false
+          });
+        }
+      });
+    </script>
+    
+    <a-entity camera custom-look-controls position="0 1.6 0"></a-entity>
+    
   </a-scene>
 </body>
 </html>
