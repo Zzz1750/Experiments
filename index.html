@@ -2,15 +2,17 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>WebXR Joystick Test</title>
+    <title> Test</title>
   </head>
   <body>
     <h1>WebXR Joystick Test</h1>
-    <p>Move your joystick to see the output below:</p>
+    <p>Click the button below to start the session and test joystick input.</p>
+    <button id="startVR">Start WebXR Session</button>
     <pre id="output">Awaiting joystick input...</pre>
 
     <script>
       const output = document.getElementById('output');
+      const startButton = document.getElementById('startVR');
       let xrSession = null;
 
       // Function to log input source data
@@ -27,15 +29,19 @@
         output.textContent = log.length ? log.join('\n') : 'No joystick input detected.';
       }
 
-      // Request WebXR session
-      navigator.xr.requestSession('immersive-vr').then((session) => {
-        xrSession = session;
-        output.textContent = 'Session started. Move the joystick!';
-        xrSession.addEventListener('inputsourceschange', () => handleInputSources(xrSession));
-        xrSession.addEventListener('selectstart', () => output.textContent += '\nSelect started.');
-        xrSession.addEventListener('selectend', () => output.textContent += '\nSelect ended.');
-      }).catch((err) => {
-        output.textContent = 'WebXR session not supported: ' + err.message;
+      // Start WebXR session on button click
+      startButton.addEventListener('click', () => {
+        if (navigator.xr) {
+          navigator.xr.requestSession('immersive-vr').then((session) => {
+            xrSession = session;
+            output.textContent = 'Session started. Move the joystick!';
+            xrSession.addEventListener('inputsourceschange', () => handleInputSources(xrSession));
+          }).catch((err) => {
+            output.textContent = 'Failed to start session: ' + err.message;
+          });
+        } else {
+          output.textContent = 'WebXR not supported on this browser.';
+        }
       });
     </script>
   </body>
