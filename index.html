@@ -8,7 +8,7 @@
   <script>
     // Custom drag rotation logic
     AFRAME.registerComponent('drag-rotate', {
-      schema: { speed: { type: 'number', default: 0.1 } },
+      schema: { speed: { type: 'number', default: 0.3 } }, // Increased speed for higher sensitivity
       init: function () {
         this.startX = 0;
         this.startY = 0;
@@ -52,7 +52,7 @@
   </script>
 </head>
 <body>
-  <a-scene>
+  <a-scene vr-mode-ui="enabled: false"> <!-- Disable AR/VR button -->
     <!-- Apply the custom drag component to the camera -->
     <a-entity camera drag-rotate position="0 1.6 0"></a-entity>
 
