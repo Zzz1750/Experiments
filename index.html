@@ -5,18 +5,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>360 Image Viewer</title>
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script>
+    // Custom drag rotation logic
+    AFRAME.registerComponent('drag-rotate', {
+      schema: { speed: { type: 'number', default: 0.1 } },
+      init: function () {
+        this.startX = 0;
+        this.startY = 0;
+        this.rotationX = 0;
+        this.rotationY = 0;
+        this.isDragging = false;
+
+        // Event listeners for touch/mouse drag
+        this.el.sceneEl.canvas.addEventListener('mousedown', this.onDragStart.bind(this));
+        this.el.sceneEl.canvas.addEventListener('touchstart', this.onDragStart.bind(this));
+        window.addEventListener('mousemove', this.onDragMove.bind(this));
+        window.addEventListener('touchmove', this.onDragMove.bind(this));
+        window.addEventListener('mouseup', this.onDragEnd.bind(this));
+        window.addEventListener('touchend', this.onDragEnd.bind(this));
+      },
+      onDragStart: function (event) {
+        this.isDragging = true;
+        const touch = event.touches ? event.touches[0] : event;
+        this.startX = touch.clientX;
+        this.startY = touch.clientY;
+      },
+      onDragMove: function (event) {
+        if (!this.isDragging) return;
+
+        const touch = event.touches ? event.touches[0] : event;
+        const deltaX = (touch.clientX - this.startX) * this.data.speed;
+        const deltaY = (touch.clientY - this.startY) * this.data.speed;
+
+        this.rotationX -= deltaY;
+        this.rotationY -= deltaX;
+
+        this.el.setAttribute('rotation', `${this.rotationX} ${this.rotationY} 0`);
+
+        this.startX = touch.clientX;
+        this.startY = touch.clientY;
+      },
+      onDragEnd: function () {
+        this.isDragging = false;
+      },
+    });
+  </script>
 </head>
 <body>
   <a-scene>
-    <!-- Increased sky size -->
-    <a-sky src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg" radius="5000" rotation="0 -90 0"></a-sky>
+    <!-- Apply the custom drag component to the camera -->
+    <a-entity camera drag-rotate position="0 1.6 0"></a-entity>
 
-    <!-- Camera with adjusted look-controls -->
-    <a-entity 
-      camera 
-      look-controls="touchEnabled: true; reverseTouchDrag: false; magicWindowTrackingEnabled: false" 
-      position="0 1.6 0">
-    </a-entity>
+    <!-- Sky element with 360° image -->
+    <a-sky src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg" rotation="0 0 0"></a-sky>
   </a-scene>
 </body>
 </html>
