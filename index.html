@@ -1,48 +1,22 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title> Test</title>
-  </head>
-  <body>
-    <h1>WebXR Joystick Test</h1>
-    <p>Click the button below to start the session and test joystick input.</p>
-    <button id="startVR">Start WebXR Session</button>
-    <pre id="output">Awaiting joystick input...</pre>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>360 Image Viewer</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+</head>
+<body>
+  <a-scene>
+    <!-- Add a sky element for the 360° image -->
+    <a-sky src="1.JPG" rotation="0 -90 0"></a-sky>
 
-    <script>
-      const output = document.getElementById('output');
-      const startButton = document.getElementById('startVR');
-      let xrSession = null;
-
-      // Function to log input source data
-      function handleInputSources(session) {
-        const inputSources = session.inputSources;
-        let log = [];
-        for (const source of inputSources) {
-          if (source.gamepad) {
-            const { axes, buttons } = source.gamepad;
-            log.push(`Axes: ${axes.map(a => a.toFixed(2)).join(', ')}`);
-            log.push(`Buttons: ${buttons.map((b, idx) => `B${idx}: ${b.value.toFixed(2)}`).join(', ')}`);
-          }
-        }
-        output.textContent = log.length ? log.join('\n') : 'No joystick input detected.';
-      }
-
-      // Start WebXR session on button click
-      startButton.addEventListener('click', () => {
-        if (navigator.xr) {
-          navigator.xr.requestSession('immersive-vr').then((session) => {
-            xrSession = session;
-            output.textContent = 'Session started. Move the joystick!';
-            xrSession.addEventListener('inputsourceschange', () => handleInputSources(xrSession));
-          }).catch((err) => {
-            output.textContent = 'Failed to start session: ' + err.message;
-          });
-        } else {
-          output.textContent = 'WebXR not supported on this browser.';
-        }
-      });
-    </script>
-  </body>
+    <!-- Camera with touch controls and no gyroscope -->
+    <a-entity 
+      camera 
+      look-controls="touchEnabled: true; reverseTouchDrag: false; enabled: true; magicWindowTrackingEnabled: false" 
+      position="0 1.6 0">
+    </a-entity>
+  </a-scene>
+</body>
 </html>
