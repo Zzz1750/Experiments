@@ -2,36 +2,69 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Raw WebXR Test</title>
+    <title>Joystick Debug</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   </head>
   <body>
-    <h1>Raw WebXR Test</h1>
-    <p>Ensure your controllers are connected and move the joystick or press buttons to see input.</p>
-    <pre id="output">Awaiting input...</pre>
+    <a-scene>
+      <!-- Sphere and Camera -->
+      <a-entity id="camera" camera position="0 0 0">
+        <a-sphere id="sphere" radius="5000" position="0 0 0" scale="-1 1 1" src="1.JPG"></a-sphere>
+      </a-entity>
+
+      <!-- Display Info -->
+      <a-text
+        id="display"
+        position="-1 2 -3"
+        color="black"
+        value="Awaiting input...">
+      </a-text>
+    </a-scene>
+
     <script>
-      const output = document.getElementById('output');
+      const sphere = document.querySelector('#sphere');
+      const display = document.querySelector('#display');
+      let isVR = false;
 
-      function checkGamepads() {
-        const gamepads = navigator.getGamepads();
-        if (!gamepads) {
-          output.innerText = 'No gamepads detected.';
-          return;
+      // Detect headset entry into VR mode
+      document.querySelector('a-scene').addEventListener('enter-vr', () => {
+        isVR = true;
+        display.setAttribute('value', 'In VR mode.');
+      });
+
+      document.querySelector('a-scene').addEventListener('exit-vr', () => {
+        isVR = false;
+        display.setAttribute('value', 'Exited VR mode.');
+      });
+
+      // Track mouse movement for dragging (fallback for desktop)
+      window.addEventListener('mousemove', (event) => {
+        if (!isVR) {
+          const dx = event.movementX * 0.05; // Scale sensitivity
+          const dy = event.movementY * 0.05;
+          const spherePosition = sphere.object3D.position;
+          sphere.object3D.position.set(spherePosition.x + dx, spherePosition.y + dy, spherePosition.z);
         }
+      });
 
-        const logs = [];
-        for (let i = 0; i < gamepads.length; i++) {
-          const gp = gamepads[i];
-          if (gp) {
-            logs.push(`Gamepad ${i}:`);
-            logs.push(`  Axes: ${gp.axes.map(a => a.toFixed(2)).join(', ')}`);
-            logs.push(`  Buttons: ${gp.buttons.map((b, idx) => `B${idx}: ${b.value.toFixed(2)}`).join(', ')}`);
+      // Check joystick or gamepad input inside VR
+      setInterval(() => {
+        const gamepads = navigator.getGamepads();
+        if (gamepads) {
+          const controller = gamepads[0] || gamepads[1]; // Assuming right-hand controller
+          if (controller) {
+            const { axes } = controller;
+            const x = axes[2]; // Horizontal joystick movement
+            const y = axes[3]; // Vertical joystick movement
+
+            if (isVR && (x || y)) {
+              sphere.object3D.position.x += x * 0.1; // Adjust sensitivity
+              sphere.object3D.position.y += y * 0.1;
+              display.setAttribute('value', `Joystick: X=${x.toFixed(2)}, Y=${y.toFixed(2)}`);
+            }
           }
         }
-
-        output.innerText = logs.length ? logs.join('\n') : 'No gamepads connected.';
-      }
-
-      setInterval(checkGamepads, 500);
+      }, 100);
     </script>
   </body>
 </html>
