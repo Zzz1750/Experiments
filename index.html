@@ -2,69 +2,41 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Joystick Debug</title>
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <title>WebXR Joystick Test</title>
   </head>
   <body>
-    <a-scene>
-      <!-- Sphere and Camera -->
-      <a-entity id="camera" camera position="0 0 0">
-        <a-sphere id="sphere" radius="5000" position="0 0 0" scale="-1 1 1" src="1.JPG"></a-sphere>
-      </a-entity>
-
-      <!-- Display Info -->
-      <a-text
-        id="display"
-        position="-1 2 -3"
-        color="black"
-        value="Awaiting input...">
-      </a-text>
-    </a-scene>
+    <h1>WebXR Joystick Test</h1>
+    <p>Move your joystick to see the output below:</p>
+    <pre id="output">Awaiting joystick input...</pre>
 
     <script>
-      const sphere = document.querySelector('#sphere');
-      const display = document.querySelector('#display');
-      let isVR = false;
+      const output = document.getElementById('output');
+      let xrSession = null;
 
-      // Detect headset entry into VR mode
-      document.querySelector('a-scene').addEventListener('enter-vr', () => {
-        isVR = true;
-        display.setAttribute('value', 'In VR mode.');
-      });
-
-      document.querySelector('a-scene').addEventListener('exit-vr', () => {
-        isVR = false;
-        display.setAttribute('value', 'Exited VR mode.');
-      });
-
-      // Track mouse movement for dragging (fallback for desktop)
-      window.addEventListener('mousemove', (event) => {
-        if (!isVR) {
-          const dx = event.movementX * 0.05; // Scale sensitivity
-          const dy = event.movementY * 0.05;
-          const spherePosition = sphere.object3D.position;
-          sphere.object3D.position.set(spherePosition.x + dx, spherePosition.y + dy, spherePosition.z);
-        }
-      });
-
-      // Check joystick or gamepad input inside VR
-      setInterval(() => {
-        const gamepads = navigator.getGamepads();
-        if (gamepads) {
-          const controller = gamepads[0] || gamepads[1]; // Assuming right-hand controller
-          if (controller) {
-            const { axes } = controller;
-            const x = axes[2]; // Horizontal joystick movement
-            const y = axes[3]; // Vertical joystick movement
-
-            if (isVR && (x || y)) {
-              sphere.object3D.position.x += x * 0.1; // Adjust sensitivity
-              sphere.object3D.position.y += y * 0.1;
-              display.setAttribute('value', `Joystick: X=${x.toFixed(2)}, Y=${y.toFixed(2)}`);
-            }
+      // Function to log input source data
+      function handleInputSources(session) {
+        const inputSources = session.inputSources;
+        let log = [];
+        for (const source of inputSources) {
+          if (source.gamepad) {
+            const { axes, buttons } = source.gamepad;
+            log.push(`Axes: ${axes.map(a => a.toFixed(2)).join(', ')}`);
+            log.push(`Buttons: ${buttons.map((b, idx) => `B${idx}: ${b.value.toFixed(2)}`).join(', ')}`);
           }
         }
-      }, 100);
+        output.textContent = log.length ? log.join('\n') : 'No joystick input detected.';
+      }
+
+      // Request WebXR session
+      navigator.xr.requestSession('immersive-vr').then((session) => {
+        xrSession = session;
+        output.textContent = 'Session started. Move the joystick!';
+        xrSession.addEventListener('inputsourceschange', () => handleInputSources(xrSession));
+        xrSession.addEventListener('selectstart', () => output.textContent += '\nSelect started.');
+        xrSession.addEventListener('selectend', () => output.textContent += '\nSelect ended.');
+      }).catch((err) => {
+        output.textContent = 'WebXR session not supported: ' + err.message;
+      });
     </script>
   </body>
 </html>
