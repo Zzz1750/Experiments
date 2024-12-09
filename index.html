@@ -5,10 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>360 Image Viewer</title>
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <style>
+    body{
+      cursor:grab;
+    }
+  </style>
   <script>
-    // Custom drag rotation logic
     AFRAME.registerComponent('drag-rotate', {
-      schema: { speed: { type: 'number', default: 0.3 } }, // Increased speed for higher sensitivity
+      schema: { speed: { type: 'number', default: 0.3 } },
       init: function () {
         this.startX = 0;
         this.startY = 0;
@@ -16,7 +20,6 @@
         this.rotationY = 0;
         this.isDragging = false;
 
-        // Event listeners for touch/mouse drag
         this.el.sceneEl.canvas.addEventListener('mousedown', this.onDragStart.bind(this));
         this.el.sceneEl.canvas.addEventListener('touchstart', this.onDragStart.bind(this));
         window.addEventListener('mousemove', this.onDragMove.bind(this));
@@ -52,12 +55,21 @@
   </script>
 </head>
 <body>
-  <a-scene vr-mode-ui="enabled: false"> <!-- Disable AR/VR button -->
-    <!-- Apply the custom drag component to the camera -->
+  <a-scene vr-mode-ui="enabled: false"> 
     <a-entity camera drag-rotate position="0 1.6 0"></a-entity>
 
-    <!-- Sky element with 360° image -->
-    <a-sky src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg" rotation="0 0 0"></a-sky>
+    <a-sky src="1.JPG" rotation="0 0 0"></a-sky>
   </a-scene>
+
+  <script>
+    document.addEventListener('mousedown', function() {
+        document.body.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mouseup', function() {
+      document.body.style.cursor = 'grab';
+  });
+</script>
+
 </body>
 </html>
