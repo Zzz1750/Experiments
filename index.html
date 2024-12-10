@@ -6,8 +6,28 @@
   <title>360 Image Viewer</title>
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <style>
-    body{
-      cursor:grab;
+    body {
+      margin: 0;
+      overflow: hidden;
+      cursor: grab;
+    }
+
+    button {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
     }
   </style>
   <script>
@@ -52,24 +72,36 @@
         this.isDragging = false;
       },
     });
+
+    // Array of images and current index
+    const images = ['1.JPG', '2.JPG', '3.JPG', '4.JPG', '5.JPG'];
+    let currentIndex = 0;
+
+    // Function to change the sky image
+    function changeImage() {
+      currentIndex = (currentIndex + 1) % images.length; // Increment and loop back
+      const sky = document.querySelector('a-sky');
+      sky.setAttribute('src', images[currentIndex]);
+    }
   </script>
 </head>
 <body>
   <a-scene vr-mode-ui="enabled: false"> 
     <a-entity camera drag-rotate position="0 1.6 0"></a-entity>
-
     <a-sky src="1.JPG" rotation="0 0 0"></a-sky>
   </a-scene>
 
+  <!-- Button to change images -->
+  <button onclick="changeImage()">Next Image</button>
+
   <script>
-    document.addEventListener('mousedown', function() {
-        document.body.style.cursor = 'grabbing';
+    document.addEventListener('mousedown', function () {
+      document.body.style.cursor = 'grabbing';
     });
 
-    document.addEventListener('mouseup', function() {
+    document.addEventListener('mouseup', function () {
       document.body.style.cursor = 'grab';
-  });
-</script>
-
+    });
+  </script>
 </body>
 </html>
