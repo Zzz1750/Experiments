@@ -1,117 +1,17 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-    <title>VR cccc</title>
+    <meta charset="utf-8">
+    <title>WebXR Minimal Test</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-        background-color: black;
-      }
-      #vr-button {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        padding: 20px 40px;
-        background-color: #007BFF;
-        color: white;
-        font-size: 20px;
-        border: none;
-        cursor: pointer;
-        border-radius: 5px;
-      }
-      #vr-button:hover {
-        background-color: #0056b3;
-      }
-      a-scene {
-        display: none;
-      }
-    </style>
   </head>
   <body>
-    <!-- VR Entry Button -->
-    <button id="vr-button">Enter VR</button>
-
-    <!-- VR Scene -->
-    <a-scene id="vr-scene" background="color: black">
-      <!-- Camera -->
-      <a-entity id="camera" camera position="0 0 0">
-        <a-text
-          value="Awaiting events..."
-          position="0 0 -2" <!-- Adjusted text position -->
-          align="center"
-          color="white"
-        ></a-text>
-      </a-entity>
+    <a-scene>
+      <a-box position="0 1.5 -3" color="red"></a-box>
+      <a-camera>
+        <a-entity oculus-touch-controls="hand: right"></a-entity>
+        <a-entity oculus-touch-controls="hand: left"></a-entity>
+      </a-camera>
     </a-scene>
-
-    <script>
-      const vrButton = document.getElementById("vr-button");
-      const vrScene = document.getElementById("vr-scene");
-
-      // Button Click: Enter VR and show scene
-      vrButton.addEventListener("click", () => {
-        vrButton.style.display = "none"; // Hide the button
-        vrScene.style.display = "block"; // Show the VR scene
-        vrScene.enterVR(); // Force VR mode
-      });
-
-      // Debug Controllers in VR
-      vrScene.addEventListener("enter-vr", () => {
-        const camera = document.getElementById("camera");
-        const text = camera.querySelector("a-text");
-
-        function checkControllers() {
-          const session = vrScene.renderer.xr.getSession();
-          if (!session) {
-            text.setAttribute("value", "No XR session found!");
-            console.log("No XR session found.");
-            return;
-          }
-
-          const inputSources = session.inputSources;
-          console.log("Input sources:", inputSources);
-
-          if (inputSources.length === 0) {
-            text.setAttribute("value", "No controllers detected!");
-            console.log("No controllers detected.");
-          } else {
-            text.setAttribute(
-              "value",
-              `Controllers detected: ${inputSources.length}`
-            );
-
-            inputSources.forEach((source, index) => {
-              console.log(`Controller ${index} detected:`, source);
-
-              // Add event listeners for buttons
-              source.gamepad?.buttons.forEach((button, buttonIndex) => {
-                console.log(
-                  `Controller ${index}, Button ${buttonIndex}:`,
-                  button
-                );
-              });
-
-              source.addEventListener("selectstart", () => {
-                text.setAttribute(
-                  "value",
-                  `Controller ${index}: Select Start`
-                );
-                console.log(`Controller ${index}: Select Start`);
-              });
-              source.addEventListener("selectend", () => {
-                text.setAttribute("value", `Controller ${index}: Select End`);
-                console.log(`Controller ${index}: Select End`);
-              });
-            });
-          }
-        }
-
-        checkControllers();
-      });
-    </script>
   </body>
 </html>
