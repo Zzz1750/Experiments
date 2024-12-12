@@ -54,11 +54,23 @@
       const vrScene = document.getElementById("vr-scene");
       const sphere = document.getElementById("sphere");
 
-      // Button Click: Enter VR and Show Scene
-      vrButton.addEventListener("click", () => {
+      // Function to handle VR entry
+      const enterVR = () => {
         vrButton.style.display = "none"; // Hide the button
         vrScene.style.display = "block"; // Show the VR scene
-        vrScene.enterVR(); // Enter VR directly
+
+        // Delay VR entry to ensure the scene initializes
+        setTimeout(() => {
+          vrScene.enterVR();
+        }, 500); // Delay for 500ms
+      };
+
+      // Button Click: Enter VR
+      vrButton.addEventListener("click", enterVR);
+
+      // Debug Sphere Rendering
+      sphere.addEventListener("loaded", () => {
+        console.log("Sphere loaded:", sphere.object3D);
       });
 
       // Joystick input handling in VR
