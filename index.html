@@ -2,20 +2,56 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Basic Controller Test</title>
+    <title>Joystick Controlled Sphere</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script>
+      AFRAME.registerComponent('joystick-control', {
+        init: function () {
+          this.el.sceneEl.addEventListener('enter-vr', () => {
+            this.session = this.el.sceneEl.renderer.xr.getSession();
+            if (!this.session) {
+              console.error('No XR session found.');
+              return;
+            }
+            console.log('Controllers detected:', this.session.inputSources);
+          });
+        },
+        tick: function () {
+          if (!this.session) return;
+
+          const inputSources = this.session.inputSources;
+          inputSources.forEach((source) => {
+            if (source.gamepad) {
+              const axes = source.gamepad.axes; // Joystick axes
+              const xAxis = axes[2]; // Horizontal movement
+              const yAxis = axes[3]; // Vertical movement
+
+              if (Math.abs(xAxis) > 0.1 || Math.abs(yAxis) > 0.1) {
+                // Rotate the sphere based on joystick input
+                const sphere = document.querySelector('#sphere');
+                const rotation = sphere.getAttribute('rotation');
+                sphere.setAttribute('rotation', {
+                  x: rotation.x + yAxis * 2,
+                  y: rotation.y - xAxis * 2,
+                  z: rotation.z,
+                });
+              }
+            }
+          });
+        },
+      });
+    </script>
   </head>
   <body>
-    <a-scene>
-      <!-- Add a sky -->
-      <a-sky color="#ECECEC"></a-sky>
+    <a-scene joystick-control>
+      <!-- Sky Sphere -->
+      <a-sphere id="sphere" radius="5000" position="0 0 0" scale="-1 1 1" src="1.JPG"></a-sphere>
 
-      <!-- Add a simple camera -->
-      <a-camera position="0 1.6 0"></a-camera>
-
-      <!-- Right and Left Hand Controllers -->
-      <a-entity oculus-touch-controls="hand: right"></a-entity>
-      <a-entity oculus-touch-controls="hand: left"></a-entity>
+      <!-- Camera -->
+      <a-camera position="0 1.6 0">
+        <a-entity oculus-touch-controls="hand: right"></a-entity>
+        <a-entity oculus-touch-controls="hand: left"></a-entity>
+      </a-camera>
     </a-scene>
   </body>
 </html>
