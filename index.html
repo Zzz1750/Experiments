@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>VR Troubleshooting</title>
+    <title>VR cccc</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <style>
       body {
@@ -41,7 +41,7 @@
       <a-entity id="camera" camera position="0 0 0">
         <a-text
           value="Awaiting events..."
-          position="0 -0.5 -1"
+          position="0 0 -2" <!-- Adjusted text position -->
           align="center"
           color="white"
         ></a-text>
@@ -68,12 +68,16 @@
           const session = vrScene.renderer.xr.getSession();
           if (!session) {
             text.setAttribute("value", "No XR session found!");
+            console.log("No XR session found.");
             return;
           }
 
           const inputSources = session.inputSources;
+          console.log("Input sources:", inputSources);
+
           if (inputSources.length === 0) {
             text.setAttribute("value", "No controllers detected!");
+            console.log("No controllers detected.");
           } else {
             text.setAttribute(
               "value",
@@ -81,20 +85,26 @@
             );
 
             inputSources.forEach((source, index) => {
+              console.log(`Controller ${index} detected:`, source);
+
               // Add event listeners for buttons
               source.gamepad?.buttons.forEach((button, buttonIndex) => {
-                button.pressed = false; // Reset pressed state
-                console.log(`Button ${buttonIndex} on Controller ${index}`);
+                console.log(
+                  `Controller ${index}, Button ${buttonIndex}:`,
+                  button
+                );
               });
 
-              source.addEventListener("selectstart", () =>
-                text.setAttribute("value", `Controller ${index}: Select Start`)
-              );
-              source.addEventListener("selectend", () =>
-                text.setAttribute("value", `Controller ${index}: Select End`)
-              );
-              source.addEventListener("inputsourceschange", () => {
-                text.setAttribute("value", "Sources changed ,detected.");
+              source.addEventListener("selectstart", () => {
+                text.setAttribute(
+                  "value",
+                  `Controller ${index}: Select Start`
+                );
+                console.log(`Controller ${index}: Select Start`);
+              });
+              source.addEventListener("selectend", () => {
+                text.setAttribute("value", `Controller ${index}: Select End`);
+                console.log(`Controller ${index}: Select End`);
               });
             });
           }
@@ -102,7 +112,6 @@
 
         checkControllers();
       });
-      // EndControllers
     </script>
   </body>
 </html>
