@@ -2,47 +2,63 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Grab and Move Cube</title>
+    <title>Debugging Controller Lines</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/wmurphyrd/aframe-super-hands-component/dist/aframe-super-hands.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/wmurphyrd/aframe-physics-system/dist/aframe-physics-system.min.js"></script>
+    <script>
+      // Add debug component to show interaction details
+      AFRAME.registerComponent('interaction-debug', {
+        init: function () {
+          this.el.addEventListener('raycaster-intersection', (evt) => {
+            const debugText = document.querySelector('#debug-text');
+            debugText.setAttribute('value', 'Intersecting: ' + evt.detail.els[0].id);
+          });
+
+          this.el.addEventListener('raycaster-intersection-cleared', () => {
+            const debugText = document.querySelector('#debug-text');
+            debugText.setAttribute('value', 'Not intersecting');
+          });
+        },
+      });
+    </script>
   </head>
   <body>
-    <a-scene physics="gravity: 0; debug: false">
+    <a-scene>
       <!-- Sky -->
       <a-sky color="#ECECEC"></a-sky>
 
       <!-- Ground -->
-      <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#7BC8A4" static-body></a-plane>
+      <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#7BC8A4"></a-plane>
 
-      <!-- Cube (Grabbable) -->
+      <!-- Debug Text -->
+      <a-text id="debug-text" value="Awaiting interaction..." position="0 2 -2" color="black"></a-text>
+
+      <!-- Cube -->
       <a-box 
-        id="grabbable-cube"
+        id="grabbable-cube" 
         position="0 1 -3" 
         color="red" 
         depth="1" 
         height="1" 
         width="1" 
-        dynamic-body 
-        grabbable>
+        class="grabbable">
       </a-box>
 
       <!-- Right Hand Controller -->
       <a-entity 
         id="right-hand"
         oculus-touch-controls="hand: right"
-        raycaster="objects: .grabbable"
+        raycaster="objects: .grabbable; far: 10; showLine: true"
         line="color: blue; opacity: 0.75"
-        super-hands="colliderEvent: raycaster-intersection; colliderEventProperty: els; colliderEndEvent: raycaster-intersection-cleared;">
+        interaction-debug>
       </a-entity>
 
       <!-- Left Hand Controller -->
       <a-entity 
         id="left-hand"
         oculus-touch-controls="hand: left"
-        raycaster="objects: .grabbable"
-        line="color: blue; opacity: 0.75"
-        super-hands="colliderEvent: raycaster-intersection; colliderEventProperty: els; colliderEndEvent: raycaster-intersection-cleared;">
+        raycaster="objects: .grabbable; far: 10; showLine: true"
+        line="color: green; opacity: 0.75"
+        interaction-debug>
       </a-entity>
 
       <!-- Camera -->
