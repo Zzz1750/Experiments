@@ -2,16 +2,20 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>WebXR Minimal Test</title>
+    <title>Basic Controller Test</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   </head>
   <body>
     <a-scene>
-      <a-box position="0 1.5 -3" color="red"></a-box>
-      <a-camera>
-        <a-entity oculus-touch-controls="hand: right"></a-entity>
-        <a-entity oculus-touch-controls="hand: left"></a-entity>
-      </a-camera>
+      <!-- Add a sky -->
+      <a-sky color="#ECECEC"></a-sky>
+
+      <!-- Add a simple camera -->
+      <a-camera position="0 1.6 0"></a-camera>
+
+      <!-- Right and Left Hand Controllers -->
+      <a-entity oculus-touch-controls="hand: right"></a-entity>
+      <a-entity oculus-touch-controls="hand: left"></a-entity>
     </a-scene>
   </body>
 </html>
