@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Direct VR with Joystick</title>
+    <title>VR Troubleshooting</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <style>
       body {
@@ -37,58 +37,72 @@
 
     <!-- VR Scene -->
     <a-scene id="vr-scene" background="color: black">
-      <!-- Camera with Sphere Parent -->
+      <!-- Camera -->
       <a-entity id="camera" camera position="0 0 0">
-        <a-sphere
-          id="sphere"
-          radius="5000"
-          scale="-1 1 1"
-          src="1.JPG"
-          position="0 0 0"
-        ></a-sphere>
+        <a-text
+          value="Awaiting events..."
+          position="0 -0.5 -1"
+          align="center"
+          color="white"
+        ></a-text>
       </a-entity>
     </a-scene>
 
     <script>
       const vrButton = document.getElementById("vr-button");
       const vrScene = document.getElementById("vr-scene");
-      const sphere = document.getElementById("sphere");
 
-      // Function to handle VR entry
-      const enterVR = () => {
+      // Button Click: Enter VR and show scene
+      vrButton.addEventListener("click", () => {
         vrButton.style.display = "none"; // Hide the button
         vrScene.style.display = "block"; // Show the VR scene
-
-        // Delay VR entry to ensure the scene initializes
-        setTimeout(() => {
-          vrScene.enterVR();
-        }, 500); // Delay for 500ms
-      };
-
-      // Button Click: Enter VR
-      vrButton.addEventListener("click", enterVR);
-
-      // Debug Sphere Rendering
-      sphere.addEventListener("loaded", () => {
-        console.log("Sphere loaded:", sphere.object3D);
+        vrScene.enterVR(); // Force VR mode
       });
 
-      // Joystick input handling in VR
-      let rotationSpeed = 2; // Adjust for sensitivity
-      setInterval(() => {
-        const gamepads = navigator.getGamepads();
-        if (gamepads) {
-          const controller = gamepads[0] || gamepads[1]; // Use the right-hand controller
-          if (controller && controller.axes) {
-            const x = controller.axes[2]; // Horizontal joystick axis
-            const y = controller.axes[3]; // Vertical joystick axis
+      // Debug Controllers in VR
+      vrScene.addEventListener("enter-vr", () => {
+        const camera = document.getElementById("camera");
+        const text = camera.querySelector("a-text");
 
-            // Rotate the sphere based on joystick input
-            sphere.object3D.rotation.y -= x * rotationSpeed * 0.01; // Horizontal rotation
-            sphere.object3D.rotation.x -= y * rotationSpeed * 0.01; // Vertical rotation
+        function checkControllers() {
+          const session = vrScene.renderer.xr.getSession();
+          if (!session) {
+            text.setAttribute("value", "No XR session found!");
+            return;
+          }
+
+          const inputSources = session.inputSources;
+          if (inputSources.length === 0) {
+            text.setAttribute("value", "No controllers detected!");
+          } else {
+            text.setAttribute(
+              "value",
+              `Controllers detected: ${inputSources.length}`
+            );
+
+            inputSources.forEach((source, index) => {
+              // Add event listeners for buttons
+              source.gamepad?.buttons.forEach((button, buttonIndex) => {
+                button.pressed = false; // Reset pressed state
+                console.log(`Button ${buttonIndex} on Controller ${index}`);
+              });
+
+              source.addEventListener("selectstart", () =>
+                text.setAttribute("value", `Controller ${index}: Select Start`)
+              );
+              source.addEventListener("selectend", () =>
+                text.setAttribute("value", `Controller ${index}: Select End`)
+              );
+              source.addEventListener("inputsourceschange", () => {
+                text.setAttribute("value", "Sources changed ,detected.");
+              });
+            });
           }
         }
-      }, 50);
+
+        checkControllers();
+      });
+      // EndControllers
     </script>
   </body>
 </html>
