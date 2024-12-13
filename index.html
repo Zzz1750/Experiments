@@ -8,7 +8,7 @@
 </head>
 <body>
   <a-scene vr-mode-ui="enabled: true">
-    <!-- A Rotating Cube -->
+    <!-- Rotating Cube -->
     <a-box 
       id="rotatingCube" 
       position="0 1.5 -3" 
@@ -18,45 +18,41 @@
       width="1">
     </a-box>
 
-    <!-- Add Camera and Controllers -->
+    <!-- Camera and Controllers -->
     <a-entity camera look-controls wasd-controls>
       <a-entity
         id="rightController"
         laser-controls="hand: right"
-        raycaster="objects: .clickable"
-        thumbstick-moved>
+        raycaster="objects: .clickable">
       </a-entity>
     </a-entity>
   </a-scene>
 
   <script>
     const cube = document.querySelector("#rotatingCube");
-    let rotation = { x: 0, y: 0, z: 0 };
-    let joystickData = { x: 0, y: 0 }; // Stores the last joystick values
+    let rotation = { x: 0, y: 0, z: 0 }; // Initial cube rotation
+    let joystickData = { x: 0, y: 0 }; // Stores joystick values
 
-    // Listen for thumbstick movement
+    // Capture thumbstick movement
     document.querySelector("#rightController").addEventListener("thumbstickmoved", (event) => {
-      const { x, y } = event.detail;
-
-      // Update joystick data
-      joystickData.x = x;
-      joystickData.y = y;
+      joystickData.x = event.detail.x; // Left-right movement
+      joystickData.y = event.detail.y; // Up-down movement
     });
 
-    // Smoothly update cube rotation
+    // Continuous rotation loop
     function updateCubeRotation() {
-      // Rotate the cube continuously based on the last joystick data
-      rotation.x += joystickData.y * 2; // Y-axis joystick affects X rotation
-      rotation.y += joystickData.x * 2; // X-axis joystick affects Y rotation
+      // Apply rotation based on joystick input
+      rotation.x += joystickData.y * 2; // Multiply to control sensitivity
+      rotation.y += joystickData.x * 2;
 
-      // Apply the updated rotation to the cube
+      // Set cube's rotation
       cube.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
 
-      // Keep polling for updates
+      // Loop the function
       requestAnimationFrame(updateCubeRotation);
     }
 
-    // Start the rotation loop
+    // Start the loop once the scene is loaded
     document.querySelector("a-scene").addEventListener("loaded", () => {
       updateCubeRotation();
     });
