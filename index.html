@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <title>Joystick Continuous Cube Rotation</title>
+  <title>Joystick Smooth Rotation</title>
 </head>
 <body>
   <a-scene vr-mode-ui="enabled: true">
@@ -20,10 +20,12 @@
 
     <!-- Camera and Controllers -->
     <a-entity camera look-controls wasd-controls>
-      <a-entity
-        id="rightController"
+      <!-- Right Controller -->
+      <a-entity 
+        id="rightController" 
+        oculus-touch-controls="hand: right" 
         laser-controls="hand: right"
-        raycaster="objects: .clickable">
+        raycaster="enabled: false">
       </a-entity>
     </a-entity>
   </a-scene>
@@ -31,37 +33,37 @@
   <script>
     const cube = document.querySelector("#rotatingCube");
     let rotation = { x: 0, y: 0, z: 0 }; // Cube's rotation
-    let joystickInput = { x: 0, y: 0 }; // Joystick data
-    let joystickActive = false; // Tracks if joystick is active
+    let joystickData = { x: 0, y: 0 }; // Joystick state
+    let isRotating = false; // Tracks if joystick is actively moving
 
     // Handle joystick movement
     document.querySelector("#rightController").addEventListener("thumbstickmoved", (event) => {
       const { x, y } = event.detail;
 
-      // Update joystick input
-      joystickInput.x = x;
-      joystickInput.y = y;
+      // Update joystick state
+      joystickData.x = x;
+      joystickData.y = y;
 
-      // Check if joystick is out of the center
-      joystickActive = Math.abs(x) > 0.1 || Math.abs(y) > 0.1;
+      // Check if the joystick is out of the center
+      isRotating = Math.abs(x) > 0.1 || Math.abs(y) > 0.1;
     });
 
     // Continuous rotation function
     function rotateCube() {
-      if (joystickActive) {
-        // Rotate based on joystick input
-        rotation.x += joystickInput.y * 2; // Up-down movement
-        rotation.y += joystickInput.x * 2; // Left-right movement
-
-        // Apply rotation to cube
-        cube.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
+      if (isRotating) {
+        // Update rotation based on joystick input
+        rotation.x += joystickData.y * 2; // Up-down movement
+        rotation.y += joystickData.x * 2; // Left-right movement
       }
 
-      // Keep the loop running
+      // Apply rotation to cube
+      cube.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
+
+      // Loop the animation frame
       requestAnimationFrame(rotateCube);
     }
 
-    // Start the rotation loop once the scene is loaded
+    // Start rotation once the scene is ready
     document.querySelector("a-scene").addEventListener("loaded", () => {
       rotateCube();
     });
