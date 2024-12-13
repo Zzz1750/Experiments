@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <title>Joystick Cube Rotation</title>
+  <title>Smooth Cube Rotation</title>
 </head>
 <body>
   <a-scene vr-mode-ui="enabled: true">
@@ -30,24 +30,34 @@
   </a-scene>
 
   <script>
-    // Get the cube and right controller
     const cube = document.querySelector("#rotatingCube");
     const rightController = document.querySelector("#rightController");
 
-    // Variable to store current rotation
+    // Store cube rotation state
     let rotation = { x: 0, y: 0, z: 0 };
 
-    // Listen for thumbstick movement
-    rightController.addEventListener("thumbstickmoved", (event) => {
-      const { x, y } = event.detail;
+    // Smooth joystick handling via gamepad polling
+    function updateCubeRotation() {
+      const controllers = navigator.getGamepads();
+      const rightHandController = controllers.find(controller => controller && controller.hand === "right");
 
-      // Update rotation values
-      rotation.x += y * 2; // Y-axis joystick moves cube along X-axis rotation
-      rotation.y += x * 2; // X-axis joystick moves cube along Y-axis rotation
+      if (rightHandController) {
+        const joystick = rightHandController.axes;
 
-      // Apply the rotation to the cube
-      cube.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
-    });
+        if (joystick) {
+          // Continuous updates based on joystick values
+          rotation.x += joystick[1] * 2; // Y-axis on joystick affects cube X rotation
+          rotation.y += joystick[0] * 2; // X-axis on joystick affects cube Y rotation
+          cube.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
+        }
+      }
+
+      // Smooth loop
+      requestAnimationFrame(updateCubeRotation);
+    }
+
+    // Start the update loop
+    updateCubeRotation();
   </script>
 </body>
 </html>
