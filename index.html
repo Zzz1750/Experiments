@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <title>Smooth Continuous Cube Rotation</title>
+  <title>Continuous Cube Rotation</title>
 </head>
 <body>
   <a-scene vr-mode-ui="enabled: true">
@@ -23,7 +23,8 @@
       <a-entity
         id="rightController"
         laser-controls="hand: right"
-        raycaster="objects: .clickable">
+        raycaster="objects: .clickable"
+        thumbstick-moved>
       </a-entity>
     </a-entity>
   </a-scene>
@@ -31,30 +32,31 @@
   <script>
     const cube = document.querySelector("#rotatingCube");
     let rotation = { x: 0, y: 0, z: 0 };
+    let joystickData = { x: 0, y: 0 }; // Stores the last joystick values
 
-    // Poll gamepad data continuously
+    // Listen for thumbstick movement
+    document.querySelector("#rightController").addEventListener("thumbstickmoved", (event) => {
+      const { x, y } = event.detail;
+
+      // Update joystick data
+      joystickData.x = x;
+      joystickData.y = y;
+    });
+
+    // Smoothly update cube rotation
     function updateCubeRotation() {
-      const gamepads = navigator.getGamepads();
-      if (gamepads) {
-        // Find the right-hand controller
-        const rightController = Array.from(gamepads).find(gp => gp && gp.hand === "right");
-        if (rightController && rightController.axes) {
-          const [xAxis, yAxis] = rightController.axes;
+      // Rotate the cube continuously based on the last joystick data
+      rotation.x += joystickData.y * 2; // Y-axis joystick affects X rotation
+      rotation.y += joystickData.x * 2; // X-axis joystick affects Y rotation
 
-          // Apply joystick input to cube rotation
-          rotation.x += yAxis * 1.5; // Y-axis joystick affects X rotation
-          rotation.y += xAxis * 1.5; // X-axis joystick affects Y rotation
+      // Apply the updated rotation to the cube
+      cube.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
 
-          // Update cube rotation
-          cube.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
-        }
-      }
-
-      // Keep polling
+      // Keep polling for updates
       requestAnimationFrame(updateCubeRotation);
     }
 
-    // Start polling once the scene is loaded
+    // Start the rotation loop
     document.querySelector("a-scene").addEventListener("loaded", () => {
       updateCubeRotation();
     });
