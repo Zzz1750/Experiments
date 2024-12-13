@@ -4,18 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <title>Joystick Data</title>
+  <title>Joystick Cube Rotation</title>
 </head>
 <body>
   <a-scene vr-mode-ui="enabled: true">
-    <!-- A Text Element to Show Joystick Data -->
-    <a-text 
-      id="joystickData" 
-      value="Joystick Data: " 
-      position="0 2 -3" 
-      color="white" 
-      align="center">
-    </a-text>
+    <!-- A Rotating Cube -->
+    <a-box 
+      id="rotatingCube" 
+      position="0 1.5 -3" 
+      color="blue" 
+      depth="1" 
+      height="1" 
+      width="1">
+    </a-box>
 
     <!-- Add Camera and Controllers -->
     <a-entity camera look-controls wasd-controls>
@@ -29,14 +30,23 @@
   </a-scene>
 
   <script>
-    // Get the right controller and text elements
+    // Get the cube and right controller
+    const cube = document.querySelector("#rotatingCube");
     const rightController = document.querySelector("#rightController");
-    const joystickDataText = document.querySelector("#joystickData");
+
+    // Variable to store current rotation
+    let rotation = { x: 0, y: 0, z: 0 };
 
     // Listen for thumbstick movement
     rightController.addEventListener("thumbstickmoved", (event) => {
       const { x, y } = event.detail;
-      joystickDataText.setAttribute("value", `Joystick Data:\nX: ${x.toFixed(2)}, Y: ${y.toFixed(2)}`);
+
+      // Update rotation values
+      rotation.x += y * 2; // Y-axis joystick moves cube along X-axis rotation
+      rotation.y += x * 2; // X-axis joystick moves cube along Y-axis rotation
+
+      // Apply the rotation to the cube
+      cube.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
     });
   </script>
 </body>
