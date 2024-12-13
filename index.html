@@ -23,41 +23,41 @@
       <a-entity
         id="rightController"
         laser-controls="hand: right"
-        raycaster="objects: .clickable"
-        thumbstick-moved>
+        raycaster="objects: .clickable">
       </a-entity>
     </a-entity>
   </a-scene>
 
   <script>
     const cube = document.querySelector("#rotatingCube");
-    const rightController = document.querySelector("#rightController");
-
-    // Store cube rotation state
     let rotation = { x: 0, y: 0, z: 0 };
 
-    // Smooth joystick handling via gamepad polling
+    // Function to smoothly track joystick input and rotate the cube
     function updateCubeRotation() {
-      const controllers = navigator.getGamepads();
-      const rightHandController = controllers.find(controller => controller && controller.hand === "right");
+      const gamepads = navigator.getGamepads();
+      if (gamepads) {
+        // Find the right-hand controller
+        const rightController = Array.from(gamepads).find(gp => gp && gp.hand === "right");
+        if (rightController && rightController.axes) {
+          const [xAxis, yAxis] = rightController.axes;
 
-      if (rightHandController) {
-        const joystick = rightHandController.axes;
+          // Apply joystick input to cube rotation
+          rotation.x += yAxis * 1.5; // Y-axis joystick affects cube X rotation
+          rotation.y += xAxis * 1.5; // X-axis joystick affects cube Y rotation
 
-        if (joystick) {
-          // Continuous updates based on joystick values
-          rotation.x += joystick[1] * 2; // Y-axis on joystick affects cube X rotation
-          rotation.y += joystick[0] * 2; // X-axis on joystick affects cube Y rotation
+          // Update cube rotation
           cube.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
         }
       }
 
-      // Smooth loop
+      // Continue updating
       requestAnimationFrame(updateCubeRotation);
     }
 
-    // Start the update loop
-    updateCubeRotation();
+    // Start rotation update loop when scene loads
+    document.querySelector("a-scene").addEventListener("loaded", () => {
+      updateCubeRotation();
+    });
   </script>
 </body>
 </html>
