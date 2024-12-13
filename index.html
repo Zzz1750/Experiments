@@ -30,25 +30,34 @@
 
   <script>
     const cube = document.querySelector("#rotatingCube");
-    let rotation = { x: 0, y: 0, z: 0 }; // Initial cube rotation
-    let joystickData = { x: 0, y: 0 }; // Stores joystick values
+    let rotation = { x: 0, y: 0, z: 0 }; // Cube's current rotation
+    let joystickData = { x: 0, y: 0 }; // Joystick position
+    let isCenter = true; // To track if joystick is at center
 
-    // Capture thumbstick movement
+    // Update joystick data on thumbstick movement
     document.querySelector("#rightController").addEventListener("thumbstickmoved", (event) => {
-      joystickData.x = event.detail.x; // Left-right movement
-      joystickData.y = event.detail.y; // Up-down movement
+      const { x, y } = event.detail;
+
+      // Update joystick data
+      joystickData.x = x;
+      joystickData.y = y;
+
+      // Detect if joystick is not in the center
+      isCenter = Math.abs(x) < 0.1 && Math.abs(y) < 0.1;
     });
 
     // Continuous rotation loop
     function updateCubeRotation() {
-      // Apply rotation based on joystick input
-      rotation.x += joystickData.y * 2; // Multiply to control sensitivity
-      rotation.y += joystickData.x * 2;
+      if (!isCenter) {
+        // Rotate based on joystick input
+        rotation.x += joystickData.y * 2; // Up-down affects X rotation
+        rotation.y += joystickData.x * 2; // Left-right affects Y rotation
+      }
 
-      // Set cube's rotation
+      // Apply rotation
       cube.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
 
-      // Loop the function
+      // Loop
       requestAnimationFrame(updateCubeRotation);
     }
 
