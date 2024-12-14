@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>sphere</title>
+  <title>A-Frame Cube Rotation</title>
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script>
     AFRAME.registerComponent('joystick-rotation', {
@@ -36,13 +36,15 @@
 </head>
 <body>
   <a-scene>
-    <!-- Sphere -->
-    <a-sphere
+    <!-- Cube -->
+    <a-box
       position="0 1.6 -3"
-      radius="1.5"
-      color="#FF5733"
+      depth="2"
+      height="2"
+      width="2"
+      color="#4CAF50"
       joystick-rotation="speed: 2">
-    </a-sphere>
+    </a-box>
 
     <!-- Right hand controller -->
     <a-entity id="right-hand" tracked-controls="hand: right"></a-entity>
