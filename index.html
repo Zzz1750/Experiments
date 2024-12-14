@@ -2,51 +2,55 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <title>Joystick Debugging</title>
+  <title>sphere</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script>
+    AFRAME.registerComponent('joystick-rotation', {
+      schema: { speed: { type: 'number', default: 1 } },
+      init: function () {
+        this.rotateX = 0;
+        this.rotateY = 0;
+      },
+      tick: function () {
+        const rightController = document.querySelector('#right-hand');
+        if (rightController) {
+          const axes = rightController.components['tracked-controls']?.gamepad?.axes || [];
+          if (axes.length >= 2) {
+            // Joystick values
+            const x = axes[0]; // Left-right movement
+            const y = axes[1]; // Up-down movement
+
+            this.rotateY += x * this.data.speed; // Rotate around Y-axis
+            this.rotateX -= y * this.data.speed; // Rotate around X-axis
+
+            this.el.object3D.rotation.set(
+              THREE.Math.degToRad(this.rotateX),
+              THREE.Math.degToRad(this.rotateY),
+              0
+            );
+          }
+        }
+      },
+    });
+  </script>
 </head>
 <body>
   <a-scene>
-    <!-- Cube -->
-    <a-box 
-      id="rotatingCube" 
-      position="0 1.5 -3" 
-      rotation="0 0 0" 
-      color="blue">
-    </a-box>
+    <!-- Sphere -->
+    <a-sphere
+      position="0 1.6 -3"
+      radius="1.5"
+      color="#FF5733"
+      joystick-rotation="speed: 2">
+    </a-sphere>
 
-    <!-- Camera and Controller -->
-    <a-entity camera>
-      <a-entity id="rightController" oculus-touch-controls="hand: right"></a-entity>
-    </a-entity>
+    <!-- Right hand controller -->
+    <a-entity id="right-hand" tracked-controls="hand: right"></a-entity>
+
+    <!-- Camera with VR entry -->
+    <a-camera position="0 1.6 0">
+      <a-entity oculus-touch-controls="hand: right"></a-entity>
+    </a-camera>
   </a-scene>
-
-  <script>
-    const cube = document.querySelector("#rotatingCube");
-    let rotation = { x: 0, y: 0, z: 0 }; // Cube rotation
-    let joystickInput = { x: 0, y: 0 }; // Joystick data
-
-    // Listen for joystick movement
-    document.querySelector("#rightController").addEventListener("thumbstickmoved", (event) => {
-      joystickInput.x = event.detail.x;
-      joystickInput.y = event.detail.y;
-      console.log(`Joystick moved: x=${joystickInput.x}, y=${joystickInput.y}`);
-    });
-
-    // Continuous rotation based on joystick input
-    function rotateCube() {
-      // Update rotation if joystick is moved
-      if (Math.abs(joystickInput.x) > 0.1 || Math.abs(joystickInput.y) > 0.1) {
-        rotation.x += joystickInput.y * 2; // Up-down movement
-        rotation.y += joystickInput.x * 2; // Left-right movement
-        cube.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
-      }
-      requestAnimationFrame(rotateCube); // Keep the loop running
-    }
-
-    // Start rotation loop
-    rotateCube();
-  </script>
 </body>
 </html>
