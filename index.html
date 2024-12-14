@@ -8,20 +8,21 @@
     AFRAME.registerComponent('joystick-rotation', {
       schema: { speed: { type: 'number', default: 2 } },
       init: function () {
-        this.rotation = new THREE.Vector3(0, 0, 0); // Store rotation
+        this.rotation = new THREE.Vector3(0, 0, 0); // Store the cube's rotation
       },
       tick: function () {
-        const controller = this.el.sceneEl.querySelector('#right-hand');
-        if (controller && controller.components['tracked-controls']) {
-          const gamepad = controller.components['tracked-controls'].controller;
-          if (gamepad && gamepad.axes) {
-            const [x, y] = gamepad.axes.slice(2, 4); // Joystick axes (right joystick is usually axes 2 and 3)
+        const controller = this.el.sceneEl.querySelector('#right-hand'); // Right-hand controller
+        if (controller) {
+          const gamepad = controller.components['tracked-controls']?.controller; // Gamepad object
+          if (gamepad && gamepad.axes && gamepad.axes.length >= 4) {
+            const x = gamepad.axes[2]; // X-axis of the right joystick
+            const y = gamepad.axes[3]; // Y-axis of the right joystick
 
             // Update rotation based on joystick input
-            this.rotation.y += x * this.data.speed * 0.05; // Horizontal rotation
-            this.rotation.x -= y * this.data.speed * 0.05; // Vertical rotation
+            this.rotation.y += x * this.data.speed * 0.05; // Horizontal rotation (Y-axis)
+            this.rotation.x -= y * this.data.speed * 0.05; // Vertical rotation (X-axis)
 
-            // Apply rotation to the object
+            // Apply the rotation to the object
             this.el.object3D.rotation.set(
               this.rotation.x,
               this.rotation.y,
@@ -45,10 +46,13 @@
       joystick-rotation="speed: 5">
     </a-box>
 
-    <!-- Right hand controller -->
-    <a-entity id="right-hand" oculus-touch-controls="hand: right"></a-entity>
+    <!-- Right-hand controller -->
+    <a-entity
+      id="right-hand"
+      oculus-touch-controls="hand: right"
+      tracked-controls></a-entity>
 
-    <!-- Camera with VR entry -->
+    <!-- Camera -->
     <a-camera position="0 1.6 0">
       <a-entity oculus-touch-controls="hand: right"></a-entity>
     </a-camera>
