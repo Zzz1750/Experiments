@@ -12,19 +12,20 @@
       },
       tick: function () {
         const controller = this.el.sceneEl.querySelector('#right-hand');
-        if (controller && controller.components['oculus-touch-controls']) {
-          const gamepad = controller.components['oculus-touch-controls'].controller;
+        if (controller && controller.components['tracked-controls']) {
+          const gamepad = controller.components['tracked-controls'].controller;
           if (gamepad && gamepad.axes) {
-            const [x, y] = gamepad.axes; // Joystick input
+            const [x, y] = gamepad.axes.slice(2, 4); // Joystick axes (right joystick is usually axes 2 and 3)
+
             // Update rotation based on joystick input
-            this.rotation.y += x * this.data.speed * 0.01; // Horizontal rotation
-            this.rotation.x -= y * this.data.speed * 0.01; // Vertical rotation
+            this.rotation.y += x * this.data.speed * 0.05; // Horizontal rotation
+            this.rotation.x -= y * this.data.speed * 0.05; // Vertical rotation
 
             // Apply rotation to the object
             this.el.object3D.rotation.set(
               this.rotation.x,
               this.rotation.y,
-              this.rotation.z
+              0
             );
           }
         }
@@ -37,9 +38,9 @@
     <!-- Cube -->
     <a-box
       position="0 1.6 -3"
-      depth="2"
-      height="2"
-      width="2"
+      depth="1"
+      height="1"
+      width="1"
       color="#4CAF50"
       joystick-rotation="speed: 5">
     </a-box>
