@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <title>Smooth Joystick Rotation</title>
+  <title>Smooth Joystick Sphere Rotation</title>
 </head>
 <body>
   <a-scene vr-mode-ui="enabled: true">
@@ -26,7 +26,7 @@
         id="rightController"
         laser-controls="hand: right"
         raycaster="objects: .clickable"
-        thumbstickmoved>
+        thumbstick-moved>
       </a-entity>
     </a-entity>
   </a-scene>
@@ -36,42 +36,42 @@
     const sphere = document.querySelector("#rotatingSphere");
     const rightController = document.querySelector("#rightController");
 
-    // Variables for rotation and velocity
+    // Variables for rotation, velocity, and joystick input
     let rotation = { x: 0, y: 0, z: 0 };
-    let velocity = { x: 0, y: 0 }; // Rotation velocity
-    let isJoystickActive = false; // Flag to check if joystick is in use
+    let velocity = { x: 0, y: 0 };
+    let joystickInput = { x: 0, y: 0 };
 
     // Listen for thumbstick movement
     rightController.addEventListener("thumbstickmoved", (event) => {
       const { x, y } = event.detail;
 
-      // Update rotation velocity based on joystick input
-      velocity.x = y * 1; // Y-axis joystick controls X-axis rotation (pitch)
-      velocity.y = x * 1; // X-axis joystick controls Y-axis rotation (yaw)
-      isJoystickActive = true; // Joystick is active
+      // Update joystick input
+      joystickInput.x = x;
+      joystickInput.y = y;
+
+      // Scale down the joystick input for reduced speed
+      velocity.x = y * 0.5; // Reduced speed for X-axis rotation
+      velocity.y = x * 0.5; // Reduced speed for Y-axis rotation
     });
 
     // Smooth rotation loop
     function updateRotation() {
-      if (isJoystickActive) {
-        // Apply velocity to rotation
-        rotation.x += velocity.x;
-        rotation.y += velocity.y;
+      // Apply velocity to the rotation values
+      rotation.x += velocity.x;
+      rotation.y += velocity.y;
 
-        // Update the sphere's rotation
-        sphere.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
-      }
+      // Update the sphere's rotation
+      sphere.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
 
-      // Decay velocity gradually (smooth stop when joystick is released)
-      velocity.x *= 0.9;
-      velocity.y *= 0.9;
+      // Gradually reduce velocity for smooth stopping
+      velocity.x *= 0.9; // Dampen X-axis velocity
+      velocity.y *= 0.9; // Dampen Y-axis velocity
 
-      // Stop joystick activity when velocity is near zero
-      if (Math.abs(velocity.x) < 0.01 && Math.abs(velocity.y) < 0.01) {
-        isJoystickActive = false;
-      }
+      // Reset joystick input when velocity is near zero
+      if (Math.abs(velocity.x) < 0.01) velocity.x = 0;
+      if (Math.abs(velocity.y) < 0.01) velocity.y = 0;
 
-      // Continue the loop
+      // Continue the animation loop
       requestAnimationFrame(updateRotation);
     }
 
