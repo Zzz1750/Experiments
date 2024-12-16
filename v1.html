@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <title>Joystick Smooth Rotation</title>
+  <title>Joystick Sphere Rotation</title>
 </head>
 <body>
   <a-scene vr-mode-ui="enabled: true">
@@ -36,34 +36,20 @@
     const sphere = document.querySelector("#rotatingSphere");
     const rightController = document.querySelector("#rightController");
 
-    // Variables for rotation and joystick state
+    // Variable to store current rotation
     let rotation = { x: 0, y: 0, z: 0 };
-    let joystickState = { x: 0, y: 0 };
 
     // Listen for thumbstick movement
     rightController.addEventListener("thumbstickmoved", (event) => {
       const { x, y } = event.detail;
 
-      // Update joystick state
-      joystickState.x = x;
-      joystickState.y = y;
-    });
+      // Update rotation values
+      rotation.x += y * 2; // Y-axis joystick moves sphere along X-axis rotation
+      rotation.y += x * 2; // X-axis joystick moves sphere along Y-axis rotation
 
-    // Smooth rotation loop
-    function updateRotation() {
-      // Apply continuous rotation based on joystick state
-      rotation.x += joystickState.y * 0.5; // Adjust speed multiplier as needed
-      rotation.y += joystickState.x * 0.5;
-
-      // Apply rotation to the sphere
+      // Apply the rotation to the sphere
       sphere.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
-
-      // Continue the loop
-      requestAnimationFrame(updateRotation);
-    }
-
-    // Start the rotation loop
-    updateRotation();
+    });
   </script>
 </body>
 </html>
