@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <title>Smooth Joystick Sphere Rotation</title>
+  <title>Responsive Joystick Rotation</title>
 </head>
 <body>
   <a-scene vr-mode-ui="enabled: true">
@@ -36,42 +36,29 @@
     const sphere = document.querySelector("#rotatingSphere");
     const rightController = document.querySelector("#rightController");
 
-    // Variables for rotation, velocity, and joystick input
+    // Variables for rotation and velocity
     let rotation = { x: 0, y: 0, z: 0 };
-    let velocity = { x: 0, y: 0 };
     let joystickInput = { x: 0, y: 0 };
 
     // Listen for thumbstick movement
     rightController.addEventListener("thumbstickmoved", (event) => {
       const { x, y } = event.detail;
 
-      // Update joystick input
-      joystickInput.x = x;
-      joystickInput.y = y;
-
-      // Scale down the joystick input for reduced speed
-      velocity.x = y * 0.5; // Reduced speed for X-axis rotation
-      velocity.y = x * 0.5; // Reduced speed for Y-axis rotation
+      // Update joystick input values
+      joystickInput.x = x * 0.5; // Scale for slower rotation
+      joystickInput.y = y * 0.5; // Scale for slower rotation
     });
 
-    // Smooth rotation loop
+    // Smooth rotation update loop
     function updateRotation() {
-      // Apply velocity to the rotation values
-      rotation.x += velocity.x;
-      rotation.y += velocity.y;
+      // Adjust rotation based on joystick input
+      rotation.x += joystickInput.y; // Y-axis joystick moves sphere along X-axis rotation
+      rotation.y += joystickInput.x; // X-axis joystick moves sphere along Y-axis rotation
 
       // Update the sphere's rotation
       sphere.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
 
-      // Gradually reduce velocity for smooth stopping
-      velocity.x *= 0.9; // Dampen X-axis velocity
-      velocity.y *= 0.9; // Dampen Y-axis velocity
-
-      // Reset joystick input when velocity is near zero
-      if (Math.abs(velocity.x) < 0.01) velocity.x = 0;
-      if (Math.abs(velocity.y) < 0.01) velocity.y = 0;
-
-      // Continue the animation loop
+      // Continue the loop
       requestAnimationFrame(updateRotation);
     }
 
