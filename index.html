@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <title>Smooth Sphere Rotation</title>
+  <title>Joystick Sphere Rotation</title>
 </head>
 <body>
   <a-scene vr-mode-ui="enabled: true">
@@ -24,8 +24,9 @@
       <!-- Right-hand Controller -->
       <a-entity
         id="rightController"
-        laser-controls="hand: right"
-        raycaster="objects: .clickable">
+        oculus-touch-controls="hand: right"
+        raycaster="objects: .clickable"
+        thumbstick-moved>
       </a-entity>
     </a-entity>
   </a-scene>
@@ -35,44 +36,26 @@
     const sphere = document.querySelector("#rotatingSphere");
     const rightController = document.querySelector("#rightController");
 
-    // Variables to store rotation state and input
-    let rotation = { x: 0, y: 0, z: 0 };
-    let joystickInput = { x: 0, y: 0 };
-    let isJoystickActive = false;
+    // Variable for joystick input and rotation
+    let rotation = { x: 0, y: 0 };
 
-    // Listen for thumbstick movement (joystick input)
+    // Listen for thumbstick movement to capture joystick input
     rightController.addEventListener("thumbstickmoved", (event) => {
       const { x, y } = event.detail;
-
-      // Update joystick input values
-      joystickInput.x = x * 0.5; // Scaled for smooth horizontal rotation
-      joystickInput.y = y * 0.5; // Scaled for smooth vertical rotation
-
-      // Mark joystick as active
-      isJoystickActive = true;
+      // Continuously apply joystick input to rotation
+      rotation.x += y * 0.5; // Adjust speed for X-axis rotation
     });
 
-    // Reset joystick input when thumbstick is released
-    rightController.addEventListener("thumbstickdown", () => {
-      isJoystickActive = false;
-    });
-
-    // Animation loop to update sphere rotation
+    // Animation loop to update rotation
     function updateRotation() {
-      if (isJoystickActive) {
-        // Apply joystick input to rotation
-        rotation.x += joystickInput.y; // Vertical joystick affects X-axis rotation
-        rotation.y += joystickInput.x; // Horizontal joystick affects Y-axis rotation
+      // Apply rotation to the sphere (only on the X-axis now)
+      sphere.setAttribute("rotation", `${rotation.x} 0 0`);
 
-        // Update the sphere's rotation
-        sphere.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
-      }
-
-      // Continue animation loop
+      // Continue the update loop
       requestAnimationFrame(updateRotation);
     }
 
-    // Start the rotation loop
+    // Start the update loop
     updateRotation();
   </script>
 </body>

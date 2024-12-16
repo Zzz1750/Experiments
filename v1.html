@@ -24,7 +24,7 @@
       <!-- Right-hand Controller -->
       <a-entity
         id="rightController"
-        oculus-touch-controls="hand: right"
+        laser-controls="hand: right"
         raycaster="objects: .clickable"
         thumbstick-moved>
       </a-entity>
@@ -36,41 +36,20 @@
     const sphere = document.querySelector("#rotatingSphere");
     const rightController = document.querySelector("#rightController");
 
-    // Variables for joystick input and rotation
+    // Variable to store current rotation
     let rotation = { x: 0, y: 0, z: 0 };
-    let joystickInput = { x: 0, y: 0 };
 
-    // Listen for thumbstick movement to capture joystick input
+    // Listen for thumbstick movement
     rightController.addEventListener("thumbstickmoved", (event) => {
       const { x, y } = event.detail;
-      joystickInput.x = x; // Joystick horizontal movement
-      joystickInput.y = y; // Joystick vertical movement
-    });
 
-    // Animation loop to update rotation
-    function updateRotation() {
-      // Smoothly adjust rotation based on joystick input
-      rotation.x += joystickInput.y * 0.5; // Adjust speed for X-axis
-      rotation.y += joystickInput.x * 0.5; // Adjust speed for Y-axis
+      // Update rotation values
+      rotation.x += y * 2; // Y-axis joystick moves sphere along X-axis rotation
+      rotation.y += x * 2; // X-axis joystick moves sphere along Y-axis rotation
 
-      // Apply rotation to the sphere
+      // Apply the rotation to the sphere
       sphere.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
-
-      // Continue the update loop
-      requestAnimationFrame(updateRotation);
-    }
-
-    // Reset joystick input when thumbstick is released
-    rightController.addEventListener("thumbstickchanged", (event) => {
-      const { x, y } = event.detail;
-      if (Math.abs(x) < 0.01 && Math.abs(y) < 0.01) {
-        joystickInput.x = 0;
-        joystickInput.y = 0;
-      }
     });
-
-    // Start the update loop
-    updateRotation();
   </script>
 </body>
 </html>
