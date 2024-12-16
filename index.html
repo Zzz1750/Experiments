@@ -24,7 +24,7 @@
       <!-- Right-hand Controller -->
       <a-entity
         id="rightController"
-        oculus-touch-controls="hand: right"
+        laser-controls="hand: right"
         raycaster="objects: .clickable"
         thumbstick-moved>
       </a-entity>
@@ -36,27 +36,19 @@
     const sphere = document.querySelector("#rotatingSphere");
     const rightController = document.querySelector("#rightController");
 
-    // Variable for joystick input and rotation
-    let rotation = { x: 0, y: 0 };
+    // Variable to store current rotation
+    let rotation = { x: 0, y: 0, z: 0 };
 
-    // Listen for thumbstick movement to capture joystick input
+    // Listen for thumbstick movement
     rightController.addEventListener("thumbstickmoved", (event) => {
       const { x, y } = event.detail;
-      // Continuously apply joystick input to rotation
-      rotation.x += y * 0.5; // Adjust speed for X-axis rotation
+
+      // Update rotation values only for X-axis (horizontal rotation)
+      rotation.x += y * 2; // Y-axis joystick moves sphere along X-axis rotation
+
+      // Apply the rotation to the sphere
+      sphere.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
     });
-
-    // Animation loop to update rotation
-    function updateRotation() {
-      // Apply rotation to the sphere (only on the X-axis now)
-      sphere.setAttribute("rotation", `${rotation.x} 0 0`);
-
-      // Continue the update loop
-      requestAnimationFrame(updateRotation);
-    }
-
-    // Start the update loop
-    updateRotation();
   </script>
 </body>
 </html>
