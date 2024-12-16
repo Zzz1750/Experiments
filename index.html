@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <title>Joystick Smooth Rotation</title>
+  <title>Smooth 360° Rotation</title>
 </head>
 <body>
   <a-scene vr-mode-ui="enabled: true">
@@ -36,9 +36,10 @@
     const sphere = document.querySelector("#rotatingSphere");
     const rightController = document.querySelector("#rightController");
 
-    // Variables for rotation and joystick state
+    // Variables for rotation, joystick state, and velocity
     let rotation = { x: 0, y: 0, z: 0 };
-    let joystickState = { x: 0, y: 0 };
+    let velocity = { x: 0, y: 0 }; // Rotation velocity
+    let joystickState = { x: 0, y: 0 }; // Joystick input state
 
     // Listen for thumbstick movement
     rightController.addEventListener("thumbstickmoved", (event) => {
@@ -51,12 +52,20 @@
 
     // Smooth rotation loop
     function updateRotation() {
-      // Apply continuous rotation based on joystick state
-      rotation.x += joystickState.y * 0.5; // Adjust speed multiplier as needed
-      rotation.y += joystickState.x * 0.5;
+      // Adjust rotation velocity based on joystick input
+      velocity.x += joystickState.y * 0.05; // Smooth acceleration for X-axis rotation
+      velocity.y += joystickState.x * 0.05; // Smooth acceleration for Y-axis rotation
+
+      // Apply velocity to rotation
+      rotation.x += velocity.x;
+      rotation.y += velocity.y;
 
       // Apply rotation to the sphere
       sphere.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
+
+      // Gradually slow down (inertia effect)
+      velocity.x *= 0.95; // Dampen X-axis velocity
+      velocity.y *= 0.95; // Dampen Y-axis velocity
 
       // Continue the loop
       requestAnimationFrame(updateRotation);
