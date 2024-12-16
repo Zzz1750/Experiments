@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <title>Smooth Joystick Sphere Rotation</title>
+  <title>Continuous Joystick Sphere Rotation</title>
 </head>
 <body>
   <a-scene vr-mode-ui="enabled: true">
@@ -43,26 +43,33 @@
     // Listen for thumbstick movement to capture joystick input
     rightController.addEventListener("thumbstickmoved", (event) => {
       const { x, y } = event.detail;
-
-      // Store joystick input (scaled for smoother movement)
-      joystickInput.x = x * 0.5; // Scale for smoother X-axis rotation
-      joystickInput.y = y * 0.5; // Scale for smoother Y-axis rotation
+      joystickInput.x = x; // Joystick horizontal movement
+      joystickInput.y = y; // Joystick vertical movement
     });
 
-    // Animation loop to apply smooth rotation
+    // Animation loop to update rotation
     function updateRotation() {
-      // Adjust rotation based on joystick input
-      rotation.x += joystickInput.y; // Joystick Y controls X-axis rotation
-      rotation.y += joystickInput.x; // Joystick X controls Y-axis rotation
+      // Smoothly adjust rotation based on joystick input
+      rotation.x += joystickInput.y * 0.5; // Adjust speed for X-axis
+      rotation.y += joystickInput.x * 0.5; // Adjust speed for Y-axis
 
-      // Apply the new rotation to the sphere
+      // Apply rotation to the sphere
       sphere.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
 
       // Continue the update loop
       requestAnimationFrame(updateRotation);
     }
 
-    // Start the rotation update loop
+    // Reset joystick input when thumbstick is released
+    rightController.addEventListener("thumbstickchanged", (event) => {
+      const { x, y } = event.detail;
+      if (Math.abs(x) < 0.01 && Math.abs(y) < 0.01) {
+        joystickInput.x = 0;
+        joystickInput.y = 0;
+      }
+    });
+
+    // Start the update loop
     updateRotation();
   </script>
 </body>
