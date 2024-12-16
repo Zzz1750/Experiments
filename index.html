@@ -15,7 +15,68 @@
             geometry="primitive: sphere; radius: 5000" 
             material="shader: flat; src: 1.JPG; side: back" 
             position="0 0 0">
-          </a-entity>
+          </a-entity><!DOCTYPE html>
+          <html>
+            <head>
+              <title>360 Viewer with Joystick Control</title>
+              <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+            </head>
+            <body>
+              <a-scene>
+                <!-- Camera Rig -->
+                <a-entity id="camera-rig" position="0 1.6 0">
+                  <!-- Camera -->
+                  <a-camera>
+                    <!-- Sphere -->
+                    <a-entity 
+                      id="sphere" 
+                      geometry="primitive: sphere; radius: 5000" 
+                      material="shader: flat; src: 1.JPG; side: back" 
+                      position="0 0 0">
+                    </a-entity>
+                  </a-camera>
+                </a-entity>
+          
+                <!-- Right Hand Controller -->
+                <a-entity id="right-controller" 
+                          oculus-touch-controls="hand: right" 
+                          gamepad-controls>
+                </a-entity>
+              </a-scene>
+          
+              <script>
+                // Add logic for joystick controls
+                AFRAME.registerComponent('joystick-rotation', {
+                  schema: { speed: { type: 'number', default: 1 } },
+                  init: function () {
+                    this.rotation = { x: 0, y: 0, z: 0 }; // Initial rotation of the sphere
+                  },
+                  tick: function () {
+                    // Access the gamepad
+                    const gamepad = this.el.components['gamepad-controls'].controller;
+                    if (!gamepad) return;
+          
+                    // Get joystick axes (right joystick is axes[2] and axes[3])
+                    const axisX = gamepad.axes[2]; // Horizontal movement
+                    const axisY = gamepad.axes[3]; // Vertical movement
+          
+                    // Adjust rotation based on joystick input
+                    const speed = this.data.speed;
+                    this.rotation.y -= axisX * speed; // Rotate sphere horizontally
+                    this.rotation.x -= axisY * speed; // Rotate sphere vertically
+          
+                    // Apply rotation to the sphere
+                    const sphere = document.querySelector('#sphere');
+                    sphere.setAttribute('rotation', `${this.rotation.x} ${this.rotation.y} ${this.rotation.z}`);
+                  }
+                });
+          
+                // Attach the component to the right hand controller
+                document.querySelector('#right-controller').setAttribute('joystick-rotation', 'speed: 2');
+              </script>
+            </body>
+          </html>
+          
         </a-camera>
       </a-entity>
     </a-scene>
