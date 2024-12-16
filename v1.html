@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <title>Continuous Joystick Sphere Rotation</title>
+  <title>Joystick Sphere Rotation</title>
 </head>
 <body>
   <a-scene vr-mode-ui="enabled: true">
@@ -24,7 +24,7 @@
       <!-- Right-hand Controller -->
       <a-entity
         id="rightController"
-        laser-controls="hand: right"
+        oculus-touch-controls="hand: right"
         raycaster="objects: .clickable"
         thumbstick-moved>
       </a-entity>
