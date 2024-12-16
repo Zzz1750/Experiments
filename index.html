@@ -43,11 +43,11 @@
     rightController.addEventListener("thumbstickmoved", (event) => {
       const { x, y } = event.detail;
 
-      // Update rotation values
-      rotation.x += y * 2; // Y-axis joystick moves sphere along X-axis rotation
-      rotation.y += x * 2; // X-axis joystick moves sphere along Y-axis rotation
+      // Update rotation values based on joystick movement
+      rotation.x += y * 2; // Y-axis joystick moves sphere along X-axis (vertical)
+      rotation.y += x * 2; // X-axis joystick moves sphere along Y-axis (horizontal)
 
-      // Apply the rotation to the sphere, excluding the Z-axis
+      // Apply the rotation to the sphere, keeping only X and Y rotation
       sphere.setAttribute("rotation", `${rotation.x} ${rotation.y} 0`);
     });
   </script>
