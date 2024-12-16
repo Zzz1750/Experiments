@@ -1,61 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>A-Frame Cube Rotation</title>
-  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <script>
-    AFRAME.registerComponent('joystick-rotation', {
-      schema: { speed: { type: 'number', default: 2 } },
-      init: function () {
-        this.rotation = new THREE.Vector3(0, 0, 0); // Store the cube's rotation
-      },
-      tick: function () {
-        const controller = this.el.sceneEl.querySelector('#right-hand'); // Right-hand controller
-        if (controller) {
-          const gamepad = controller.components['tracked-controls']?.controller; // Gamepad object
-          if (gamepad && gamepad.axes && gamepad.axes.length >= 4) {
-            const x = gamepad.axes[2]; // X-axis of the right joystick
-            const y = gamepad.axes[3]; // Y-axis of the right joystick
+<html>
+  <head>
+    <title>360 Image Viewer for Disabled</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <a-entity id="sphere" geometry="primitive: sphere; radius: 5000" 
+                material="shader: flat; src: 1.JPG; side: back" 
+                position="0 0 0">
+      </a-entity>
 
-            // Update rotation based on joystick input
-            this.rotation.y += x * this.data.speed * 0.05; // Horizontal rotation (Y-axis)
-            this.rotation.x -= y * this.data.speed * 0.05; // Vertical rotation (X-axis)
-
-            // Apply the rotation to the object
-            this.el.object3D.rotation.set(
-              this.rotation.x,
-              this.rotation.y,
-              0
-            );
-          }
-        }
-      },
-    });
-  </script>
-</head>
-<body>
-  <a-scene>
-    <!-- Cube -->
-    <a-box
-      position="0 1.6 -3"
-      depth="1"
-      height="1"
-      width="1"
-      color="#4CAF50"
-      joystick-rotation="speed: 5">
-    </a-box>
-
-    <!-- Right-hand controller -->
-    <a-entity
-      id="right-hand"
-      oculus-touch-controls="hand: right"
-      tracked-controls></a-entity>
-
-    <!-- Camera -->
-    <a-camera position="0 1.6 0">
-      <a-entity oculus-touch-controls="hand: right"></a-entity>
-    </a-camera>
-  </a-scene>
-</body>
+      <a-entity id="camera-rig" position="0 1.6 0">
+      <a-camera></a-camera>
+      </a-entity>
+    </a-scene>
+  </body>
 </html>
