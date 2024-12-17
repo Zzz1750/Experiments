@@ -4,60 +4,51 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <title>Joystick Smooth Sphere Rotation</title>
+  <title>Joystick Sphere Rotation</title>
 </head>
 <body>
   <a-scene vr-mode-ui="enabled: true">
     <!-- Camera Rig -->
     <a-entity id="camera-rig" position="0 1.6 0">
       <!-- Camera -->
-      <a-camera></a-camera>
-
-      <!-- Sphere for 360° Image -->
-      <a-entity
-        id="rotatingSphere"
-        geometry="primitive: sphere; radius: 5000"
-        material="shader: flat; src: 1.png; side: back"
-        position="0 0 0"
-        rotation-updater>
-      </a-entity>
+      <a-camera>
+        <!-- Sphere for 360° Image -->
+        <a-entity 
+          id="rotatingSphere"
+          geometry="primitive: sphere; radius: 5000" 
+          material="shader: flat; src: 1.JPG; side: back" 
+          position="0 0 0">
+        </a-entity>
+      </a-camera>
 
       <!-- Right-hand Controller -->
       <a-entity
         id="rightController"
         laser-controls="hand: right"
-        raycaster="objects: .clickable">
+        raycaster="objects: .clickable"
+        thumbstick-moved>
       </a-entity>
     </a-entity>
   </a-scene>
 
   <script>
-    AFRAME.registerComponent('rotation-updater', {
-      schema: {
-        speed: { type: 'number', default: 2 }, // Rotation speed multiplier
-        damping: { type: 'number', default: 0.1 } // Smoothing factor (lower = smoother)
-      },
-      init: function () {
-        this.targetRotation = { x: 0, y: 0 }; // Desired rotation based on input
-        this.currentRotation = { x: 0, y: 0 }; // Actual rotation applied to the sphere
-        this.controller = document.querySelector('#rightController');
-        this.controller.addEventListener('thumbstickmoved', this.onThumbstickMoved.bind(this));
-      },
-      onThumbstickMoved: function (event) {
-        const { x, y } = event.detail;
-        // Update the target rotation based on joystick movement
-        this.targetRotation.x -= y * this.data.speed; // Y-axis joystick moves sphere along X-axis rotation
-        this.targetRotation.y -= x * this.data.speed; // X-axis joystick moves sphere along Y-axis rotation
-      },
-      tick: function (time, timeDelta) {
-        // Gradually move current rotation towards target rotation using damping
-        const dampingFactor = this.data.damping;
-        this.currentRotation.x += (this.targetRotation.x - this.currentRotation.x) * dampingFactor;
-        this.currentRotation.y += (this.targetRotation.y - this.currentRotation.y) * dampingFactor;
+    // Get the sphere and right controller
+    const sphere = document.querySelector("#rotatingSphere");
+    const rightController = document.querySelector("#rightController");
 
-        // Apply the smoothed rotation to the sphere
-        this.el.setAttribute('rotation', `${this.currentRotation.x} ${this.currentRotation.y} 0`);
-      }
+    // Variable to store current rotation
+    let rotation = { x: 0, y: 0, z: 0 };
+
+    // Listen for thumbstick movement
+    rightController.addEventListener("thumbstickmoved", (event) => {
+      const { x, y } = event.detail;
+
+      // Update rotation values
+      rotation.x += y * 2; // Y-axis joystick moves sphere along X-axis rotation
+      rotation.y += x * 2; // X-axis joystick moves sphere along Y-axis rotation
+
+      // Apply the rotation to the sphere
+      sphere.setAttribute("rotation", `${rotation.x} ${rotation.y} ${rotation.z}`);
     });
   </script>
 </body>
